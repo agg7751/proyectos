@@ -1,0 +1,1789 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0B1A2E">
+<title>Asistencia Nocturna No. 1</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Asistencia">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0B1A2E">
+
+<style>
+:root{
+  --ink:#0B1A2E;--ink2:#17325A;--brass:#C69A4A;--brass2:#E2C17F;
+  --bg:#F3F4F7;--surface:#fff;--fg:#0F1726;--muted:#5D6779;--line:#E1E4EB;
+  --ok:#17845A;--okbg:#E3F4EC;--warn:#A8670F;--warnbg:#FBF0DD;--bad:#B4332B;--badbg:#FBE6E4;
+  --on:#F4F1EA;--shadow:0 1px 2px rgba(11,26,46,.06),0 8px 24px rgba(11,26,46,.07);
+  --f:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"Roboto Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root{--bg:#070F1B;--surface:#0F1C30;--fg:#E8ECF3;--muted:#93A0B5;--line:#1E2F49;--brass:#D7AE62;
+  --ok:#43C08A;--okbg:#0F2E22;--warn:#E3A84A;--warnbg:#2E2210;--bad:#EE776E;--badbg:#341614;--shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f);-webkit-tap-highlight-color:transparent;padding-bottom:env(safe-area-inset-bottom)}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+[hidden]{display:none!important}
+.modos{display:flex;gap:6px;margin-top:12px;position:relative;z-index:1}
+.modos button{flex:1;min-width:0;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#F4F1EA;border-radius:10px;padding:8px 2px;font-weight:600;font-size:12.5px;white-space:nowrap}
+.modos button[aria-pressed="true"]{background:#E2C17F;color:#0B1A2E;border-color:#E2C17F}
+.mhint{position:relative;z-index:1;text-align:center;font-size:12px;color:rgba(244,241,234,.7);margin-top:8px}
+.lock{position:fixed;inset:0;z-index:100;background:radial-gradient(120% 140% at 85% -10%,#17325A 0%,#0B1A2E 55%);display:grid;place-items:center;padding:24px}
+.lock .input{background:#F4F1EA;color:#0B1A2E}
+body:has(#act) #modal > *{z-index:100000}
+.lockbox{width:100%;max-width:320px;display:flex;flex-direction:column;gap:14px;text-align:center}
+#pinIn{font-size:30px;letter-spacing:.5em;text-align:center;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;width:100%}
+.chip.bad{background:var(--badbg);color:var(--bad)}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:7px 14px;font-weight:600;font-size:13px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--on);border-color:var(--ink)}
+@media (prefers-color-scheme:dark){.seg button[aria-pressed="true"]{background:var(--brass);color:#0B1A2E;border-color:var(--brass)}}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:600 11px var(--f)}
+.chart .lbl{fill:var(--fg)}
+details.panel>summary{cursor:pointer;list-style:none;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:650}
+details.panel>summary::-webkit-details-marker{display:none}
+details.panel>summary::after{content:"▾";color:var(--muted)}
+details[open].panel>summary::after{content:"▴"}
+.alert{border-left:4px solid var(--bad)}
+
+
+.hero{background:radial-gradient(120% 140% at 85% -10%,var(--ink2) 0%,var(--ink) 55%);color:var(--on);padding:calc(18px + env(safe-area-inset-top)) 0 24px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-40px;bottom:-60px;width:220px;height:220px;border-radius:50%;border:1px solid rgba(198,154,74,.18);box-shadow:0 0 0 28px rgba(198,154,74,.05),0 0 0 56px rgba(198,154,74,.03)}
+.top{display:flex;align-items:center;gap:12px;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.crest{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#D9B26A,#A77A2E);color:#0B1A2E;font-weight:800;font-size:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35);flex:none}
+.brand small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--brass2);opacity:.9}
+.brand b{font-weight:650;font-size:16.5px;letter-spacing:-.01em}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:6px 10px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);white-space:nowrap;position:relative;z-index:1}
+.pill i{width:8px;height:8px;border-radius:50%;background:#43C08A}
+.pill.off i{background:#E3A84A}
+.today{margin-top:20px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;position:relative;z-index:1}
+.date{font-size:13px;color:rgba(244,241,234,.7)}
+.big{font-size:46px;font-weight:700;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.big span{font-size:20px;color:rgba(244,241,234,.55);font-weight:500}
+.lbl{font-size:12px;color:rgba(244,241,234,.65);margin-top:6px}
+.ring{width:76px;height:76px;flex:none}
+.scan{position:relative;z-index:1;margin-top:20px;width:100%;display:flex;align-items:center;justify-content:center;gap:12px;padding:18px;border:0;border-radius:16px;background:linear-gradient(180deg,#DDB771,#C1913F);color:#0B1A2E;font-weight:700;font-size:18px;box-shadow:0 10px 30px rgba(198,154,74,.28),inset 0 1px 0 rgba(255,255,255,.45)}
+.scan:active{transform:scale(.98)}
+.scan svg{width:24px;height:24px}
+
+.tabs{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
+.tabs .wrap{display:flex;gap:4px;padding-block:8px}
+.tab{flex:1;border:0;background:transparent;padding:10px 2px;border-radius:10px;font-weight:600;font-size:13px;color:var(--muted);min-width:0;white-space:nowrap}
+.tabs .wrap{gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.tab{flex:1 0 auto!important;padding:10px 7px!important}
+#v-falt .li,#v-padr .li{flex-wrap:wrap;row-gap:8px}
+#v-falt .li .t{flex:1 1 calc(100% - 52px)}
+#v-falt .li .t ~ button.btn:first-of-type{margin-left:48px}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:var(--shadow)}
+main .wrap{padding-block:18px 48px;display:flex;flex-direction:column;gap:18px}
+h2{font-size:18px;font-weight:650;letter-spacing:-.01em;margin:0}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sh p{margin:0;color:var(--muted);font-size:13px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.pad{padding:16px;display:flex;flex-direction:column;gap:12px}
+
+.result{border-radius:18px;overflow:hidden;background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow)}
+.result .band{padding:14px 16px;font-weight:650}
+.result.ok .band{background:var(--okbg);color:var(--ok)}
+.result.dup .band{background:var(--warnbg);color:var(--warn)}
+.result.err .band{background:var(--badbg);color:var(--bad)}
+.result .body{padding:16px;display:flex;flex-direction:column;gap:12px}
+.who{display:flex;gap:14px;align-items:center}
+.av{width:52px;height:52px;border-radius:14px;background:var(--ink);color:var(--brass2);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none}
+.av.s{width:36px;height:36px;border-radius:10px;font-size:13px}
+.who .n{font-size:19px;font-weight:650;line-height:1.25}
+.who .m{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:15px;text-decoration:none;color:var(--fg)}
+.btn.pri{background:var(--ink);color:var(--on);border-color:var(--ink)}
+@media (prefers-color-scheme:dark){.btn.pri{background:var(--brass);color:#0B1A2E;border-color:var(--brass)}}
+.btn.block{width:100%}
+.btn.wa{background:#1FAF5A;color:#fff;border-color:#1FAF5A}
+.btn.ghost{background:transparent}
+.btn.sm{padding:8px 12px;font-size:13.5px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>.btn{flex:1 1 140px}
+.msg{font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px 12px}
+.tel{font-family:var(--mono);font-size:13px}
+
+.groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.g{padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.g .t{display:flex;justify-content:space-between;align-items:baseline}
+.g .nm{font-weight:700;font-size:16px}
+.g .num{font-variant-numeric:tabular-nums;font-weight:650}
+.g .num small{color:var(--muted);font-weight:500}
+.bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--brass),var(--brass2));border-radius:99px}
+.li{display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.li:first-child{border-top:0}
+.li .t{flex:1;min-width:0}
+.li .t b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.li .t span{font-size:12px;color:var(--muted)}
+.chip{font-size:12px;font-weight:650;padding:4px 9px;border-radius:99px;background:var(--bg);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.ok{background:var(--okbg);color:var(--ok)}
+.chip.warn{background:var(--warnbg);color:var(--warn)}
+.time{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.empty{padding:26px 18px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--fg);font-size:16px;margin-bottom:4px}
+.input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+textarea.input{min-height:140px;font-family:var(--mono);font-size:12.5px}
+label.f{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:var(--muted)}
+
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.kpi{padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.kpi .v{font-size:26px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.tbox{overflow-x:auto;border-radius:16px;border:1px solid var(--line);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:13.5px}
+th,td{padding:10px 12px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:650;background:var(--bg)}
+th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+th:first-child{background:var(--bg)}
+tr.ins td{color:var(--muted);font-weight:650}
+td.gr{background:rgba(198,154,74,.09);font-weight:650}
+th.gr{color:var(--brass)}
+.pct{font-weight:700}.pct.hi{color:var(--ok)}.pct.mid{color:var(--warn)}.pct.lo{color:var(--bad)}
+
+/* Cámara */
+.cam{position:fixed;inset:0;background:#000;z-index:40;display:flex;flex-direction:column}
+.cam video{flex:1;width:100%;object-fit:cover;min-height:0}
+.cam .frame{position:absolute;left:50%;top:42%;width:min(68vw,300px);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:22px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);border:3px solid var(--brass2)}
+.cam .ctop{position:absolute;top:0;left:0;right:0;padding:calc(14px + env(safe-area-inset-top)) 16px 14px;color:#fff;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(rgba(0,0,0,.6),transparent)}
+.cam .cbot{padding:14px 16px calc(16px + env(safe-area-inset-bottom));background:var(--surface);border-radius:20px 20px 0 0;max-height:62%;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.cam .cx{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:99px;padding:8px 14px;font-weight:600}
+
+.scrim{position:fixed;inset:0;background:rgba(5,10,20,.55);z-index:30;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:20px max(16px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));max-height:90%;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom));background:var(--ink);color:var(--on);padding:12px 18px;border-radius:12px;font-weight:500;z-index:50;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+code{font-family:var(--mono);font-size:12px;background:var(--bg);padding:2px 5px;border-radius:5px;word-break:break-all}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="top">
+      <div class="brand"><div class="crest" id="crest" role="button" tabindex="0" aria-label="Acerca de la app" style="cursor:pointer">SN1</div><div><small>Salinas Victoria, N.L. · v24</small><b>Sec. Nocturna No. 1</b></div></div>
+      <span class="pill" id="pill"><i></i><span id="pillTxt">—</span></span>
+    </div>
+    <div class="today">
+      <div>
+        <div class="date" id="hoyFecha">—</div>
+        <div class="big" id="hoyNum">0<span> / 0</span></div>
+        <div class="lbl">alumnos presentes hoy</div>
+      </div>
+      <svg class="ring" viewBox="0 0 80 80" aria-hidden="true">
+        <circle cx="40" cy="40" r="32" fill="none" stroke="rgba(244,241,234,.12)" stroke-width="8"/>
+        <circle id="arc" cx="40" cy="40" r="32" fill="none" stroke="#D7AE62" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 201" transform="rotate(-90 40 40)"/>
+        <text id="arcTxt" x="40" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="#F4F1EA" font-family="system-ui,sans-serif">0%</text>
+      </svg>
+    </div>
+    <button class="scan" id="btnScan" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M7 12h10"/></svg>
+      <span id="btnScanTxt">Escanear entrada</span>
+    </button>
+    <div class="modos" id="modos" role="group" aria-label="Modo de escaneo"></div>
+    <div class="mhint" id="modoInfo"></div>
+    <input id="foto" type="file" accept="image/*" capture="environment" hidden>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist"><div class="wrap">
+  <button class="tab" data-v="hoy" aria-selected="true">Hoy</button>
+  <button class="tab" data-v="dir" aria-selected="false" id="tabDir" style="display:none">Dirección</button>
+  <button class="tab" data-v="falt" aria-selected="false">Faltas</button>
+  <button class="tab" data-v="conc" aria-selected="false">Resumen</button>
+  <button class="tab" data-v="alum" aria-selected="false">Alumnos</button>
+  <button class="tab" data-v="padr" aria-selected="false">Padres</button>
+  <button class="tab" data-v="ajus" aria-selected="false">Drive</button>
+</div></nav>
+
+<main>
+<section class="wrap" id="v-hoy">
+  <div id="res"></div>
+  <div id="cotejoBox"></div>
+  <div id="smsBox"></div>
+  <div class="sh"><h2>Por grupo</h2><p id="pend"></p></div>
+  <div class="groups" id="groups"></div>
+  <div class="sh"><h2>Registro de hoy</h2><p>¿Olvidó su gafete? Búscalo</p></div>
+  <input class="input" id="q" placeholder="Buscar alumno por nombre…" autocomplete="off">
+  <div class="panel" id="hoyList"></div>
+</section>
+
+<section class="wrap" id="v-dir" hidden>
+  <div class="sh"><h2>Toda la escuela</h2><button class="btn sm" id="dirAct" type="button">Actualizar</button></div>
+  <p class="note" id="dirInfo">Datos acumulados en Drive de todos los celulares.</p>
+  <div id="dirBody"></div>
+</section>
+
+<section class="wrap" id="v-falt" hidden>
+  <div class="sh"><h2>Seguimiento de faltas</h2><p id="fDias"></p></div>
+  <div class="seg" role="group" aria-label="Periodo">
+    <button type="button" data-per="sem" aria-pressed="true">Esta semana</button>
+    <button type="button" data-per="mes" aria-pressed="false">Este mes</button>
+    <button type="button" data-per="todo" aria-pressed="false">Todo el ciclo</button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Días de clase</div><div class="v" id="fK1">0</div></div>
+    <div class="kpi"><div class="k">Faltas</div><div class="v" id="fK2">0</div></div>
+    <div class="kpi"><div class="k">Asistencia</div><div class="v" id="fK3">—</div></div>
+  </div>
+  <div id="fRiesgo"></div>
+  <div id="fAlertas"></div>
+  <div class="panel pad"><div class="sh"><h2>Faltas por grupo</h2><p id="fPerTxt"></p></div><div id="fChartG"></div></div>
+  <div class="panel pad"><div class="sh"><h2>Asistencia por día</h2><p>últimos días de clase</p></div><div id="fChartD"></div></div>
+  <details class="panel" id="fHoyBox"><summary><span id="fHoyT">Sin registro hoy</span></summary><div id="fHoy"></div></details>
+  <details class="panel"><summary>Alumnos con más faltas</summary><div id="fTop"></div></details>
+  <details class="panel"><summary>Faltas por semana y grupo</summary><div class="tbox" style="border:0;border-radius:0"><table id="fSem"></table></div></details>
+  <details class="panel"><summary>Faltas por mes y grupo</summary><div class="tbox" style="border:0;border-radius:0"><table id="fMes"></table></div></details>
+  <p class="note">Un día cuenta como “día de clase” cuando se registró al menos un alumno. Las faltas se calculan con lo escaneado en este celular. Si escanean varios celulares, los datos completos de toda la escuela están en la hoja de Drive (pestañas Faltas, Alertas y Gráficas).</p>
+</section>
+
+<section class="wrap" id="v-conc" hidden>
+  <div class="sh"><h2>Concentrado global</h2><p>Presentes por grupo y grado</p></div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Inscritos</div><div class="v" id="kIns">0</div></div>
+    <div class="kpi"><div class="k">Prom. 7 días</div><div class="v" id="kProm">—</div></div>
+    <div class="kpi"><div class="k">Días</div><div class="v" id="kDias">0</div></div>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><div class="k">Hombres</div><div class="v" id="kH">0</div><div class="note" id="kHh"></div></div>
+    <div class="kpi"><div class="k">Mujeres</div><div class="v" id="kM">0</div><div class="note" id="kMh"></div></div>
+    <div class="kpi"><div class="k">Presentes hoy</div><div class="v" id="kP">0</div><div class="note" id="kPh"></div></div>
+  </div>
+  <div class="tbox"><table id="tabla"></table></div>
+  <button class="btn pri block" id="btnExport" type="button">Compartir / guardar Excel</button>
+  <p class="note">Genera un archivo .csv que abre en Excel. Puedes enviarlo por WhatsApp o guardarlo en Drive desde el menú de compartir.</p>
+</section>
+
+<section class="wrap" id="v-alum" hidden>
+  <div class="sh"><h2>Alumnos</h2><p id="alCount"></p></div>
+  <button class="btn pri block" id="btnNuevo" type="button">+ Agregar alumno</button>
+  <div class="row"><select class="input" id="fG" style="flex:1"></select></div>
+  <input class="input" id="qa" placeholder="Buscar…" autocomplete="off">
+  <div class="panel" id="alList"></div>
+</section>
+
+<section class="wrap" id="v-padr" hidden>
+  <div class="panel pad"><h2>Avisos a padres</h2><p class="note">Manda el mismo aviso a los papás de uno o varios grupos, uno tras otro por WhatsApp.</p><button class="btn pri block" id="btnAviso" type="button">Nuevo aviso</button></div>
+  <div class="panel" id="pAvisos"></div>
+  <div class="panel pad"><h2>Juntas de padres</h2><p class="note">Crea la junta y escanea el gafete del alumno cuando llegue su papá o mamá. Verás el % de asistencia por grupo y a quién avisar.</p><button class="btn pri block" id="btnJunta" type="button">Nueva junta</button></div>
+  <div class="panel" id="pJuntas"></div>
+</section>
+
+<section class="wrap" id="v-ajus" hidden>
+  <div class="panel pad" id="adminLock">
+    <h2>Sección de dirección</h2>
+    <p class="note" id="admTxt">Esta sección es solo para la dirección.</p>
+    <input class="input" id="admP1" type="password" placeholder="Clave de administración" autocomplete="off">
+    <input class="input" id="admP2" type="password" placeholder="Repite la contraseña" autocomplete="off" hidden>
+    <p class="note" id="admMsg" style="color:var(--bad)"></p>
+    <button class="btn pri block" id="admOk" type="button">Entrar</button>
+  </div>
+  <div id="adminBody" hidden style="display:flex;flex-direction:column;gap:18px">
+  <div class="panel pad"><div class="sh"><h2>Dirección</h2><button class="btn sm" id="admSalir" type="button">Cerrar sección</button></div>
+    <p class="note">Esta sección se abre con la clave de administración. Las claves se cambian o se quitan en la hoja de Drive, pestaña “Claves de acceso”.</p>
+    <p class="note" id="admDisp"></p>
+  </div>
+  <div class="panel pad">
+    <h2>Inicio del control</h2>
+    <p class="note">Desde la fecha de inicio de cada grupo empiezan a contar asistencias, faltas, gráficas y semáforo, en todos los celulares. Puedes iniciar los grupos poco a poco; un grupo “Sin iniciar” no cuenta faltas. Para reiniciar un grupo, ponle una fecha nueva: lo registrado antes pasa a la pestaña “Respaldo asistencia” de Drive y deja de contar.</p>
+    <label class="f">Fecha de inicio<input class="input" id="iniF" type="date"></label>
+    <div id="iniLista"></div>
+    <button class="btn pri block" id="iniTodos" type="button">Iniciar todos los grupos en esa fecha</button>
+    <p class="note" id="iniMsg"></p>
+  </div>
+  <div class="panel pad">
+    <h2>Horario</h2>
+    <p class="note">Sirve para marcar retardos al escanear la entrada y salidas anticipadas al escanear la salida.</p>
+    <div class="row"><label class="f" style="flex:1">Hora de entrada<input class="input" id="cfE" type="time"></label><label class="f" style="flex:1">Tolerancia (min)<input class="input" id="cfT" type="number" min="0" max="60" inputmode="numeric"></label></div>
+    <label class="f">Hora de salida<input class="input" id="cfS" type="time"></label>
+    <button class="btn pri" id="btnCfg" type="button">Guardar horario</button>
+  </div>
+  <div class="panel pad">
+    <h2>Proteger con PIN</h2>
+    <p class="note" id="pinEstado"></p>
+    <div class="row"><input class="input" id="pinNuevo" type="password" inputmode="numeric" maxlength="6" placeholder="PIN de 4 a 6 números" autocomplete="off" style="flex:1"><button class="btn pri" id="btnPin" type="button" style="flex:0 0 auto">Guardar PIN</button></div>
+    <button class="btn" id="btnPinQuitar" type="button">Quitar PIN</button>
+    <p class="note">El PIN impide que alguien abra la app en este celular. Si lo olvidas, se puede quitar borrando los datos de la app; después hay que activarla otra vez y se pierde lo que no se haya enviado a Drive.</p>
+  </div>
+  <div class="panel pad">
+    <h2>Sincronizar con Google Drive</h2>
+    <p class="note">Cada escaneo se guarda primero en este celular. Cuando hay señal, se envía solo a la hoja de cálculo de la secundaria en Drive. Si no hay señal, se queda en espera y se manda después.</p>
+    <label class="f">Enlace de la hoja (lo obtienes una sola vez)<input class="input" id="url" placeholder="https://script.google.com/macros/s/…/exec" inputmode="url" autocomplete="off"></label>
+    <div class="row"><button class="btn pri" id="btnUrl" type="button">Guardar enlace</button><button class="btn" id="btnSync" type="button">Sincronizar ahora</button></div>
+    <button class="btn block" id="btnLista" type="button">Actualizar lista de alumnos desde Drive</button>
+    <div class="msg" id="syncInfo">—</div>
+  </div>
+  <div class="panel pad">
+    <h2>Respaldo</h2>
+    <p class="note">Si cambias de celular o borras los datos del navegador, se pierde lo guardado en el teléfono. Descarga un respaldo de vez en cuando.</p>
+    <div class="row"><button class="btn" id="btnBak" type="button">Descargar respaldo</button><button class="btn" id="btnRes" type="button">Restaurar respaldo</button></div>
+    <input type="file" id="fileRes" accept=".json,application/json" hidden>
+  </div>
+  <div class="panel pad">
+    <h2>Reiniciar asistencia</h2>
+    <p class="note">Borra todas las asistencias registradas en este celular (por ejemplo, las de prueba) y lo pendiente por enviar. La lista de alumnos y sus teléfonos se conservan. Lo que ya llegó a Drive no se borra de allá.</p>
+    <button class="btn" id="btnReset" type="button" style="color:var(--bad)">Borrar asistencias</button>
+  </div>
+  </div>
+</section>
+</main>
+
+<div id="modal"></div>
+
+<script>
+/* Generador QR propio (sin internet): versión 1 (21×21), modo byte, corrección M (hasta 14 caracteres).
+   QRENC.matrix(texto) -> arreglo 21×21 (1 = oscuro) */
+const QRENC = (() => {
+  "use strict";
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  { let x = 1; for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; } for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255]; }
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  function generador(n) { let g = [1]; for (let i = 0; i < n; i++) { const r = new Array(g.length + 1).fill(0);
+    for (let j = 0; j < g.length; j++) { r[j] ^= g[j]; r[j + 1] ^= mul(g[j], EXP[i]); } g = r; } return g; }
+  function ecc(data, n) { const g = generador(n), res = data.concat(new Array(n).fill(0));
+    for (let i = 0; i < data.length; i++) { const c = res[i]; if (c) for (let j = 0; j < g.length; j++) res[i + j] ^= mul(g[j], c); }
+    return res.slice(data.length); }
+  const MASK = [(i, j) => ((i + j) & 1) === 0, (i) => (i & 1) === 0, (i, j) => j % 3 === 0, (i, j) => (i + j) % 3 === 0,
+    (i, j) => (((i >> 1) + Math.floor(j / 3)) & 1) === 0, (i, j) => (i * j) % 6 === 0, (i, j) => ((i * j) % 6) < 3, (i, j) => ((i + j + ((i * j) % 3)) & 1) === 0];
+  function formato(mask) { const d = (0 << 3) | mask; let v = d << 10; for (let i = 14; i >= 10; i--) if (v & (1 << i)) v ^= 0x537 << (i - 10); return ((d << 10) | v) ^ 0x5412; }
+  function penal(m) { const D = 21; let p = 0;
+    for (let k = 0; k < 2; k++) for (let a = 0; a < D; a++) { let run = 1;
+      for (let b = 1; b < D; b++) { const v = k ? m[b][a] : m[a][b], u = k ? m[b - 1][a] : m[a][b - 1];
+        if (v === u) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1; } }
+    for (let i = 0; i < D - 1; i++) for (let j = 0; j < D - 1; j++) { const s = m[i][j] + m[i + 1][j] + m[i][j + 1] + m[i + 1][j + 1]; if (s === 0 || s === 4) p += 3; }
+    let dark = 0; m.forEach(r => r.forEach(v => dark += v)); p += Math.floor(Math.abs(dark * 100 / (D * D) - 50) / 5) * 10;
+    return p; }
+  function matrix(texto) {
+    const bytes = Array.from(unescape(encodeURIComponent(texto)), c => c.charCodeAt(0));
+    if (bytes.length > 14) throw new Error("Texto demasiado largo para el gafete");
+    const bits = []; const put = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
+    put(4, 4); put(bytes.length, 8); bytes.forEach(b => put(b, 8));
+    for (let i = 0; i < 4 && bits.length < 128; i++) bits.push(0);
+    while (bits.length % 8) bits.push(0);
+    const data = []; for (let i = 0; i < bits.length; i += 8) data.push(parseInt(bits.slice(i, i + 8).join(""), 2));
+    for (let k = 0; data.length < 16; k++) data.push(k % 2 ? 0x11 : 0xEC);
+    const cw = data.concat(ecc(data, 10));
+    const D = 21, base = Array.from({ length: D }, () => new Array(D).fill(0)), fn = Array.from({ length: D }, () => new Array(D).fill(false));
+    const set = (r, c, v) => { base[r][c] = v; fn[r][c] = true; };
+    for (const [r0, c0] of [[0, 0], [0, 14], [14, 0]]) for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+      const R = r0 + r, C = c0 + c; if (R < 0 || C < 0 || R >= D || C >= D) continue;
+      const on = r >= 0 && r <= 6 && c >= 0 && c <= 6 && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+      set(R, C, on ? 1 : 0); }
+    for (let k = 8; k <= 12; k++) { set(6, k, k % 2 === 0 ? 1 : 0); set(k, 6, k % 2 === 0 ? 1 : 0); }
+    set(13, 8, 1);
+    for (let k = 0; k <= 8; k++) { if (!fn[8][k]) set(8, k, 0); if (!fn[k][8]) set(k, 8, 0); }
+    for (let k = 13; k < D; k++) { if (!fn[8][k]) set(8, k, 0); if (!fn[k][8]) set(k, 8, 0); }
+    const cbits = []; cw.forEach(b => { for (let i = 7; i >= 0; i--) cbits.push((b >> i) & 1); });
+    let best = null, bp = Infinity;
+    for (let mk = 0; mk < 8; mk++) {
+      const m = base.map(r => r.slice()); let idx = 0, up = true;
+      for (let j = D - 1; j > 0; j -= 2) { if (j === 6) j--;
+        for (let k = 0; k < D; k++) { const i = up ? D - 1 - k : k;
+          for (let t = 0; t < 2; t++) { const c = j - t; if (fn[i][c]) continue;
+            let v = cbits[idx++] || 0; if (MASK[mk](i, c)) v ^= 1; m[i][c] = v; } }
+        up = !up; }
+      const f = formato(mk), b = n => (f >> n) & 1;
+      const p1 = [[8, 0], [8, 1], [8, 2], [8, 3], [8, 4], [8, 5], [8, 7], [8, 8], [7, 8], [5, 8], [4, 8], [3, 8], [2, 8], [1, 8], [0, 8]];
+      const p2 = [[20, 8], [19, 8], [18, 8], [17, 8], [16, 8], [15, 8], [14, 8], [8, 13], [8, 14], [8, 15], [8, 16], [8, 17], [8, 18], [8, 19], [8, 20]];
+      p1.forEach(([r, c], n) => m[r][c] = b(14 - n)); p2.forEach(([r, c], n) => m[r][c] = b(14 - n));
+      const p = penal(m); if (p < bp) { bp = p; best = m; }
+    }
+    return best;
+  }
+  return { matrix };
+})();
+</script>
+<script>
+/* Lector QR propio (sin internet). Optimizado para QR versión 1 (21×21), como los gafetes.
+   decodeQR(gray: Uint8Array, w, h) -> string | null */
+const QRDEC = (() => {
+  "use strict";
+  const EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  { let x = 1; for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; } for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255]; }
+  const mul = (a, b) => (a && b) ? EXP[LOG[a] + LOG[b]] : 0;
+  const div = (a, b) => a ? EXP[(LOG[a] + 255 - LOG[b]) % 255] : 0;
+  const apow = k => EXP[((k % 255) + 255) % 255];
+  const evalLow = (p, x) => { let r = 0; for (let i = p.length - 1; i >= 0; i--) r = mul(r, x) ^ p[i]; return r; };
+
+  /* Reed-Solomon: corrige en sitio. cw = bytes de mayor a menor grado. */
+  function rsCorrect(cw, nEc) {
+    const n = cw.length, S = [];
+    let bad = false;
+    for (let i = 0; i < nEc; i++) { let s = 0; const a = apow(i); for (let k = 0; k < n; k++) s = mul(s, a) ^ cw[k]; S.push(s); if (s) bad = true; }
+    if (!bad) return true;
+    let C = [1], B = [1], L = 0, m = 1, b = 1;
+    for (let k = 0; k < nEc; k++) {
+      let d = S[k]; for (let i = 1; i <= L; i++) d ^= mul(C[i] || 0, S[k - i]);
+      if (d === 0) { m++; continue; }
+      const coef = div(d, b), T = C.slice();
+      for (let i = 0; i < B.length; i++) { const j = i + m; while (C.length <= j) C.push(0); C[j] ^= mul(coef, B[i]); }
+      if (2 * L <= k) { L = k + 1 - L; B = T; b = d; m = 1; } else m++;
+    }
+    if (L * 2 > nEc) return false;
+    const pos = [];
+    for (let p = 0; p < n; p++) if (evalLow(C, apow(-(n - 1 - p))) === 0) pos.push(p);
+    if (pos.length !== L) return false;
+    const Om = new Array(nEc).fill(0);
+    for (let i = 0; i < nEc; i++) for (let j = 0; j < C.length && i + j < nEc; j++) Om[i + j] ^= mul(S[i], C[j]);
+    const dC = []; for (let i = 1; i < C.length; i++) dC.push(i & 1 ? C[i] : 0);
+    for (const p of pos) {
+      const X = apow(n - 1 - p), Xi = apow(-(n - 1 - p));
+      const den = evalLow(dC, Xi); if (!den) return false;
+      cw[p] ^= mul(X, div(evalLow(Om, Xi), den));
+    }
+    for (let i = 0; i < nEc; i++) { let s = 0; const a = apow(i); for (let k = 0; k < n; k++) s = mul(s, a) ^ cw[k]; if (s) return false; }
+    return true;
+  }
+
+  const FMT = []; for (let d = 0; d < 32; d++) { let v = d << 10; for (let i = 14; i >= 10; i--) if (v & (1 << i)) v ^= 0x537 << (i - 10); FMT.push([d, ((d << 10) | v) ^ 0x5412]); }
+  const popc = x => { let c = 0; while (x) { c += x & 1; x >>= 1; } return c; };
+  function fmtDecode(bits) { let best = null, bd = 4; for (const [d, c] of FMT) { const h = popc(bits ^ c); if (h < bd) { bd = h; best = d; } } return best; }
+  const MASK = [(i, j) => ((i + j) & 1) === 0, (i) => (i & 1) === 0, (i, j) => j % 3 === 0, (i, j) => (i + j) % 3 === 0,
+    (i, j) => (((i >> 1) + Math.floor(j / 3)) & 1) === 0, (i, j) => (i * j) % 6 === 0, (i, j) => ((i * j) % 6) < 3, (i, j) => ((i + j + ((i * j) % 3)) & 1) === 0];
+  const NDATA = { 1: 19, 0: 16, 3: 13, 2: 9 }; // ecBits -> codewords de datos (v1)
+
+  function readGrid(g) { // g[r][c] 1=oscuro, 21x21
+    const D = 21, bit = (r, c) => g[r][c];
+    let f1 = 0; for (let c = 0; c < 6; c++) f1 = (f1 << 1) | bit(8, c); f1 = (f1 << 1) | bit(8, 7); f1 = (f1 << 1) | bit(8, 8); f1 = (f1 << 1) | bit(7, 8);
+    for (let r = 5; r >= 0; r--) f1 = (f1 << 1) | bit(r, 8);
+    let f2 = 0; for (let r = D - 1; r >= D - 7; r--) f2 = (f2 << 1) | bit(r, 8); for (let c = D - 8; c < D; c++) f2 = (f2 << 1) | bit(8, c);
+    let fd = fmtDecode(f1); if (fd === null) fd = fmtDecode(f2); if (fd === null) return null;
+    const ec = fd >> 3, mk = MASK[fd & 7], nData = NDATA[ec];
+    const fn = (r, c) => (r < 9 && c < 9) || (r < 9 && c > 12) || (r > 12 && c < 9) || r === 6 || c === 6;
+    const cw = []; let cur = 0, nb = 0, up = true;
+    for (let j = D - 1; j > 0; j -= 2) {
+      if (j === 6) j--;
+      for (let k = 0; k < D; k++) { const i = up ? D - 1 - k : k;
+        for (let t = 0; t < 2; t++) { const c = j - t; if (fn(i, c)) continue;
+          let v = bit(i, c); if (mk(i, c)) v ^= 1; cur = (cur << 1) | v; if (++nb === 8) { cw.push(cur); cur = 0; nb = 0; } } }
+      up = !up;
+    }
+    if (cw.length !== 26 || !rsCorrect(cw, 26 - nData)) return null;
+    let bp = 0; const rd = n => { let v = 0; for (let i = 0; i < n; i++) { v = (v << 1) | ((cw[bp >> 3] >> (7 - (bp & 7))) & 1); bp++; } return v; };
+    const mode = rd(4); if (mode !== 4) return null;
+    const len = rd(8); if (len > nData - 2) return null;
+    let s = ""; for (let i = 0; i < len; i++) s += String.fromCharCode(rd(8));
+    try { return decodeURIComponent(escape(s)); } catch { return s; }
+  }
+
+  function binarize(gray, w, h, win) {
+    const I = new Uint32Array((w + 1) * (h + 1));
+    for (let y = 0; y < h; y++) { let row = 0; for (let x = 0; x < w; x++) { row += gray[y * w + x]; I[(y + 1) * (w + 1) + x + 1] = I[y * (w + 1) + x + 1] + row; } }
+    const bin = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++) { const y0 = Math.max(0, y - win), y1 = Math.min(h, y + win + 1);
+      for (let x = 0; x < w; x++) { const x0 = Math.max(0, x - win), x1 = Math.min(w, x + win + 1);
+        const sum = I[y1 * (w + 1) + x1] - I[y0 * (w + 1) + x1] - I[y1 * (w + 1) + x0] + I[y0 * (w + 1) + x0];
+        const mean = sum / ((x1 - x0) * (y1 - y0));
+        bin[y * w + x] = gray[y * w + x] < mean * 0.9 - 2 ? 1 : 0; } }
+    return bin;
+  }
+
+  function ratioOK(c) { const t = c[0] + c[1] + c[2] + c[3] + c[4]; if (t < 7) return 0; const m = t / 7, v = m * 0.7;
+    return (Math.abs(c[0] - m) < v && Math.abs(c[1] - m) < v && Math.abs(c[2] - 3 * m) < 2.2 * v && Math.abs(c[3] - m) < v && Math.abs(c[4] - m) < v) ? t : 0; }
+
+  function finders(bin, w, h) {
+    const at = (x, y) => (x < 0 || y < 0 || x >= w || y >= h) ? -1 : bin[y * w + x];
+    function cross(cx, cy, dx, dy, max) {
+      const A = k => at(Math.round(cx + dx * k), Math.round(cy + dy * k));
+      if (A(0) !== 1) return null; const c = [0, 0, 0, 0, 0]; let k = 0;
+      while (A(k) === 1) { c[2]++; k--; } const a = k + 1;
+      while (A(k) === 0 && c[1] <= max) { c[1]++; k--; } if (A(k) !== 1) return null;
+      while (A(k) === 1 && c[0] <= max) { c[0]++; k--; }
+      k = 1; while (A(k) === 1) { c[2]++; k++; } const b = k - 1;
+      while (A(k) === 0 && c[3] <= max) { c[3]++; k++; } if (A(k) !== 1) return null;
+      while (A(k) === 1 && c[4] <= max) { c[4]++; k++; }
+      const t = ratioOK(c); return t ? { t, ctr: (a + b) / 2 } : null;
+    }
+    const cands = [];
+    function found(st, xEnd, y) {
+      const tH = ratioOK(st); if (!tH) return;
+      let cx = xEnd - st[4] - st[3] - st[2] / 2;
+      const v = cross(cx, y, 0, 1, tH); if (!v || v.t > tH * 2 || v.t < tH / 2) return;
+      const cy = y + v.ctr;
+      const hh = cross(cx, cy, 1, 0, tH); if (!hh) return; cx += hh.ctr;
+      const m = (hh.t + v.t) / 14;
+      for (const q of cands) if (Math.hypot(q.x - cx, q.y - cy) < m * 2.5 && Math.abs(q.m - m) < m * 0.6) { q.x = (q.x * q.n + cx) / (q.n + 1); q.y = (q.y * q.n + cy) / (q.n + 1); q.m = (q.m * q.n + m) / (q.n + 1); q.n++; return; }
+      cands.push({ x: cx, y: cy, m, n: 1 });
+    }
+    for (let y = 0; y < h; y++) {
+      let st = [0, 0, 0, 0, 0], cur = 0;
+      for (let x = 0; x < w; x++) { const d = bin[y * w + x];
+        if (d) { if (cur & 1) cur++; st[cur]++; }
+        else if (cur & 1) st[cur]++;
+        else if (cur === 4) { found(st, x, y); st = [st[2], st[3], st[4], 1, 0]; cur = 3; }
+        else if (cur > 0 || st[0] > 0) { cur++; st[cur]++; } }
+      if (cur === 4) found(st, w, y);
+    }
+    return cands.filter(c => c.n >= 2).sort((a, b) => b.n - a.n).slice(0, 8);
+  }
+
+  function triples(c) {
+    const out = [];
+    for (let i = 0; i < c.length; i++) for (let j = i + 1; j < c.length; j++) for (let k = j + 1; k < c.length; k++) {
+      const P = [c[i], c[j], c[k]], ms = P.map(p => p.m), mx = Math.max(...ms), mn = Math.min(...ms); if (mx / mn > 1.6) continue;
+      const d = (p, q) => Math.hypot(p.x - q.x, p.y - q.y);
+      const sides = [[d(P[1], P[2]), 0], [d(P[0], P[2]), 1], [d(P[0], P[1]), 2]].sort((a, b) => b[0] - a[0]);
+      const A = P[sides[0][1]], others = P.filter((_, z) => z !== sides[0][1]);
+      const l1 = d(A, others[0]), l2 = d(A, others[1]); if (Math.max(l1, l2) / Math.min(l1, l2) > 1.45) continue;
+      const hyp = sides[0][0], rh = hyp / Math.hypot(l1, l2); if (rh < 0.85 || rh > 1.15) continue;
+      const mAvg = (ms[0] + ms[1] + ms[2]) / 3, mods = (l1 + l2) / 2 / mAvg; if (mods < 9 || mods > 22) continue;
+      let B = others[0], C = others[1];
+      if ((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x) < 0) [B, C] = [C, B];
+      out.push({ A, B, C, score: Math.abs(rh - 1) + Math.abs(l1 / l2 - 1) + Math.abs(mods - 14) / 14 });
+    }
+    return out.sort((a, b) => a.score - b.score).slice(0, 4);
+  }
+
+  function quad(x0, y0, x1, y1, x2, y2, x3, y3) { // (0,0)->P0 (1,0)->P1 (1,1)->P2 (0,1)->P3
+    const dx3 = x0 - x1 + x2 - x3, dy3 = y0 - y1 + y2 - y3;
+    let a13 = 0, a23 = 0;
+    if (Math.abs(dx3) > 1e-9 || Math.abs(dy3) > 1e-9) {
+      const dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2, den = dx1 * dy2 - dx2 * dy1;
+      if (Math.abs(den) < 1e-9) return null;
+      a13 = (dx3 * dy2 - dx2 * dy3) / den; a23 = (dx1 * dy3 - dx3 * dy1) / den;
+    }
+    const a11 = x1 - x0 + a13 * x1, a21 = x3 - x0 + a23 * x3, a12 = y1 - y0 + a13 * y1, a22 = y3 - y0 + a23 * y3;
+    return (u, v) => { const d = a13 * u + a23 * v + 1; return [(a11 * u + a21 * v + x0) / d, (a12 * u + a22 * v + y0) / d]; };
+  }
+
+  function sample(bin, w, h, T, da, db) {
+    const { A, B, C } = T;
+    const Ux = (B.x - A.x) / 14, Uy = (B.y - A.y) / 14, Vx = (C.x - A.x) / 14, Vy = (C.y - A.y) / 14;
+    const Dx = B.x + C.x - A.x + da * Ux + db * Vx, Dy = B.y + C.y - A.y + da * Uy + db * Vy;
+    const map = quad(A.x, A.y, B.x, B.y, Dx, Dy, C.x, C.y); if (!map) return null;
+    const px = (x, y) => (x >= 0 && y >= 0 && x < w && y < h) ? bin[y * w + x] : 0;
+    const g = [];
+    for (let i = 0; i < 21; i++) { const row = [];
+      for (let j = 0; j < 21; j++) { let s = 0;
+        for (const [ou, ov] of [[0, 0], [0.22, 0], [-0.22, 0], [0, 0.22], [0, -0.22]]) {
+          const [x, y] = map((j + 0.5 + ou - 3.5) / 14, (i + 0.5 + ov - 3.5) / 14); s += px(Math.round(x), Math.round(y)); }
+        row.push(s >= 3 ? 1 : 0); }
+      g.push(row); }
+    return g;
+  }
+  const OFFS = []; for (const a of [0, 0.6, -0.6, 1.2, -1.2, 1.8, -1.8]) for (const b of [0, 0.6, -0.6, 1.2, -1.2, 1.8, -1.8]) OFFS.push([a, b]);
+  OFFS.sort((p, q) => (Math.abs(p[0]) + Math.abs(p[1])) - (Math.abs(q[0]) + Math.abs(q[1])));
+
+  const STATS = { marcas: 0 };
+  function decode(gray, w, h) {
+    STATS.marcas = 0;
+    for (const win of [Math.max(8, Math.round(Math.min(w, h) / 10)), Math.max(6, Math.round(Math.min(w, h) / 22))]) {
+      const bin = binarize(gray, w, h, win);
+      const cs = finders(bin, w, h); STATS.marcas = Math.max(STATS.marcas, Math.min(cs.length, 3)); if (cs.length < 3) continue;
+      for (const T of triples(cs)) for (const [a, b] of OFFS) { const g = sample(bin, w, h, T, a, b); const r = g && readGrid(g); if (r) return r; }
+    }
+    return null;
+  }
+
+  function fromImageData(img, maxSide) {
+    let { data, width: w, height: h } = img;
+    const g = new Uint8Array(w * h);
+    for (let i = 0, p = 0; i < g.length; i++, p += 4) g[i] = (data[p] * 77 + data[p + 1] * 150 + data[p + 2] * 29) >> 8;
+    return decode(g, w, h);
+  }
+  return { decode, fromImageData, STATS, _rs: rsCorrect };
+})();
+</script>
+<script>
+(() => {
+"use strict";
+const ESCUELA = "Esc. Sec. Nocturna No. 1";
+const TZ = "America/Monterrey";
+const ORDEN = ["1°A","1°B","1°C","2°A","2°B","2°C","3°A","3°B","3°C"];
+const LISTA_INICIAL = /*__ALUMNOS__*/[];
+const LISTA_VER = "2026-11-11b";
+const KEY = "sn1_asistencia_v1";
+
+/* ---------- Estado persistente ---------- */
+let S;
+const URL_ESCUELA = "https://script.google.com/macros/s/AKfycbxQrrsP0s6hmqFbs_ynphvpX7mfQjOEqRjAOg7cpJ0OGpv2ViuRFnwUHU4BXaIqnYZChw/exec";
+const normClave = s => String(s||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+function cargar(){
+  try { S = JSON.parse(localStorage.getItem(KEY)); } catch { S = null; }
+  if (S && S.demo && S.demo.bak) { try { S = JSON.parse(S.demo.bak); delete S.demo; } catch {} }   // celular que se quedó en modo demo (v23)
+  if (!S || !S.alumnos) {
+    S = {alumnos:{}, asis:{}, cola:[], url:"", ultimoSync:null};
+    LISTA_INICIAL.forEach(a => S.alumnos[a.id] = {nombre:a.nombre, grupo:a.grupo, tel:a.tel, tutor:a.tutor, sexo:a.sexo||""});
+    S.listaVer = LISTA_VER;
+    guardar();
+  }
+  if (S.listaVer !== LISTA_VER) { // actualización de la lista: agrega alumnos nuevos y teléfonos faltantes, sin borrar nada
+    let nuevos = 0, tels = 0;
+    const nn = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z ]/g," ").split(/\s+/).filter(Boolean).sort().join(" ");
+    LISTA_INICIAL.forEach(a => {
+      // si este alumno se había agregado a mano en el celular, pasa su asistencia al ID oficial
+      Object.keys(S.alumnos).forEach(lid => { const l = S.alumnos[lid];
+        if (l.local && lid !== a.id && nn(l.nombre) === nn(a.nombre)) {
+          Object.values(S.asis).forEach(reg => { if (reg[lid] && !reg[a.id]) reg[a.id] = reg[lid]; delete reg[lid]; });
+          S.cola.forEach(r => { if (r.id === lid) { r.id = a.id; r.rid = r.fecha + "_" + a.id; } });
+          if (!S.alumnos[a.id]) S.alumnos[a.id] = {nombre:a.nombre, grupo:a.grupo, tel:a.tel || l.tel, tutor:a.tutor || l.tutor};
+          S.alias = S.alias || {}; S.alias[lid] = a.id; delete S.alumnos[lid]; } });
+      const s = S.alumnos[a.id];
+      if (!s) { S.alumnos[a.id] = {nombre:a.nombre, grupo:a.grupo, tel:a.tel, tutor:a.tutor, sexo:a.sexo||""}; nuevos++; }
+      else { if (!String(s.tel||"").replace(/\D/g,"") && a.tel) { s.tel = a.tel; s.tutor = s.tutor || a.tutor; tels++; } if (!s.sexo && a.sexo) s.sexo = a.sexo; }
+    });
+    S.listaVer = LISTA_VER; guardar();
+    if (nuevos || tels) setTimeout(() => toast(`Lista actualizada: ${tels} teléfono(s) y ${nuevos} alumno(s) nuevos`), 600);
+  }
+}
+function guardar(){
+  try { localStorage.setItem(KEY, JSON.stringify(S)); return true; }
+  catch { toast("No se pudo guardar en el celular: memoria llena"); return false; }
+}
+cargar();
+if (!S.dev) { S.dev = "d" + Array.from(crypto.getRandomValues(new Uint8Array(10)), b => b.toString(16).padStart(2,"0")).join(""); guardar(); }
+if (S.clave) { delete S.clave; guardar(); } // v20: la contraseña ya no se guarda en el celular
+const APP_VER = "v26";
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch {}
+
+/* ---------- Utilidades ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ini = n => String(n||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
+function ahora(){
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hour12:false}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+  return {fecha:`${p.year}-${p.month}-${p.day}`, hora:`${p.hour==="24"?"00":p.hour}:${p.minute}`};
+}
+const fLarga = f => { const [y,m,d]=f.split("-").map(Number); return new Date(Date.UTC(y,m-1,d,12)).toLocaleDateString("es-MX",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"}); };
+const fCorta = f => { const [y,m,d]=f.split("-"); return `${d}/${m}/${y}`; };
+const ordG = (a,b) => { const i=ORDEN.indexOf(a), j=ORDEN.indexOf(b); return (i<0?99:i)-(j<0?99:j) || a.localeCompare(b); };
+const tel52 = t => { const d=String(t||"").replace(/\D/g,""); return d.length===10 ? "+52"+d : (d.length===12&&d.startsWith("52") ? "+"+d : ""); };
+let tT; function toast(t){ clearTimeout(tT); let e=$(".toast"); if(!e){e=document.createElement("div");e.className="toast";document.body.appendChild(e);} e.textContent=t; e.hidden=false; tT=setTimeout(()=>e.hidden=true,2600); }
+const grupos = () => [...new Set(Object.values(S.alumnos).map(a=>a.grupo))].sort(ordG);
+const hoyReg = () => S.asis[ahora().fecha] || {};
+const alu = id => S.alumnos[id] || (S.dir && S.dir[id]) || null;           // alumno propio o del directorio de la escuela
+const otrosHoy = () => (S.otros && S.otros[ahora().fecha]) || {};
+const regDe = (f, id) => (S.asis[f] || {})[id] || ((S.otros || {})[f] || {})[id];
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.setAttribute("aria-selected", x===t));
+  ["hoy","dir","falt","conc","alum","padr","ajus"].forEach(v => $("#v-"+v).hidden = v!==t.dataset.v);
+  if (t.dataset.v==="dir") { renderTablero(); cargarTablero(); }
+  if (t.dataset.v==="ajus") { renderAdmin(); renderSync(); renderAjustes2(); } else { adminOk = false; claveSesion = ""; }
+  if (t.dataset.v==="padr") renderPadres();
+}));
+
+/* ---------- Render ---------- */
+function render(){
+  const {fecha} = ahora(); const reg = hoyReg();
+  const ins = Object.keys(S.alumnos).length;
+  const pres = Object.keys(reg).filter(id=>S.alumnos[id]).length;
+  { const s=fLarga(fecha); $("#hoyFecha").textContent = s.charAt(0).toUpperCase()+s.slice(1); }
+  $("#hoyNum").innerHTML = `${pres}<span> / ${ins}</span>`;
+  const pct = ins ? Math.round(pres/ins*100) : 0;
+  $("#arc").setAttribute("stroke-dasharray", `${pct/100*201} 201`); $("#arcTxt").textContent = pct+"%";
+  if (S.tok && Array.isArray(S.alcance) && !S.alcance.length) { $("#groups").innerHTML = `<div class="panel pad"><b>Sin grupos asignados</b><p class="note">Puedes escanear gafetes en la entrada: se registran y llegan a Drive. Para ver listas y datos, pide a la dirección que te asigne tus grupos (hoja de Drive, pestaña Dispositivos).</p></div>`; }
+  else $("#groups").innerHTML = grupos().map(g => {
+    const tot = Object.values(S.alumnos).filter(a=>a.grupo===g).length;
+    const p = Object.keys(reg).filter(id=>S.alumnos[id]?.grupo===g).length;
+    return `<div class="g"><div class="t"><span class="nm">${esc(g)}</span><span class="num">${p}<small> / ${tot}</small></span></div><div class="bar"><i style="width:${tot?p/tot*100:0}%"></i></div></div>`;
+  }).join("");
+  renderHoy(); renderCotejo(); renderSmsBox(); renderAlumnos(); renderConc(); renderFaltas(); renderPill(); renderModos(); renderPadres();
+}
+function renderPill(){
+  const n = S.cola.length, on = navigator.onLine;
+  $("#pill").classList.toggle("off", !on || n>0);
+  $("#pillTxt").textContent = !S.tok ? "Sin activar" : (S.url && (claveEstado === "clave" || claveEstado === "sin_clave")) ? "Revisar contraseña" : !S.url ? (on ? "Sin Drive" : "Sin señal") : n ? `${n} por enviar` : (on ? "Al día en Drive" : "Sin señal");
+  $("#pend").textContent = n ? `${n} registro(s) esperando señal para Drive` : "";
+}
+function renderHoy(){
+  const q = $("#q").value.trim().toLowerCase(); const reg = hoyReg();
+  let h;
+  if (q) {
+    h = Object.entries(S.alumnos).filter(([id,a]) => a.nombre.toLowerCase().includes(q) || id===q).sort((a,b)=>a[1].nombre.localeCompare(b[1].nombre)).slice(0,30)
+      .map(([id,a]) => `<div class="li"><div class="av s">${esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)}</span></div>${reg[id] ? `<span class="chip ok">${reg[id].h}</span>` : `<button class="btn sm" data-mark="${esc(id)}" type="button">Registrar</button>`}</div>`).join("")
+      || `<div class="empty">Sin coincidencias.</div>`;
+  } else {
+    h = Object.entries(reg).sort((a,b)=>b[1].h.localeCompare(a[1].h)).map(([id,r]) => { const a=S.alumnos[id]||{nombre:id,grupo:""};
+      return `<div class="li"><div class="av s">${esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)}${a.local?" · sin validación":""}</span></div><span class="time">${r.h}${r.s?" → "+r.s:""}</span>${r.r?`<span class="chip warn" title="Retardo">R</span>`:""}${r.sa?`<span class="chip warn" title="Salida anticipada">SA</span>`:""}<button class="btn sm ${r.sms?"ghost":""}" data-show="${esc(id)}" type="button">${r.sms?"Enviado ✓":tel52(a.tel)?"Mensaje":"Sin tel."}</button></div>`; }).join("")
+      || `<div class="empty"><b>Nadie registrado todavía</b>Toca “Escanear gafetes” cuando llegue el primer alumno.</div>`;
+  }
+  $("#hoyList").innerHTML = h;
+}
+function renderAlumnos(){
+  const sel = $("#fG"), cur = sel.value;
+  sel.innerHTML = `<option value="">Todos los grupos</option><option value="__sintel" ${cur==="__sintel"?"selected":""}>Solo sin teléfono</option>` + grupos().map(g=>`<option ${g===cur?"selected":""}>${esc(g)}</option>`).join("");
+  const q = $("#qa").value.trim().toLowerCase();
+  const L = Object.entries(S.alumnos).filter(([,a]) => (!sel.value || (sel.value==="__sintel" ? !tel52(a.tel) : a.grupo===sel.value)) && (!q||a.nombre.toLowerCase().includes(q)))
+    .sort((a,b)=>ordG(a[1].grupo,b[1].grupo)||a[1].nombre.localeCompare(b[1].nombre));
+  const sinTel = Object.values(S.alumnos).filter(a=>!tel52(a.tel)).length;
+  $("#alCount").textContent = `${Object.keys(S.alumnos).length} alumnos · ${sinTel} sin teléfono`;
+  const RK = {}; L.forEach(([id]) => { RK[id] = riesgo(id).n; });
+  $("#alList").innerHTML = L.map(([id,a]) => `<div class="li"><div class="av s">${RK[id]==="rojo"||RK[id]==="amarillo" ? PUNTO[RK[id]] : esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)} · ${tel52(a.tel)?`<span class="tel">${esc(a.tel)}</span>`:"sin teléfono"}</span></div>${a.local?`<span class="chip warn">Sin validación</span>`:""}${(S.cotejo && (S.cotejo.faltantes||[]).some(f=>f.id===id)) ? `<span class="chip" style="background:var(--badbg);color:var(--bad)">No está en SEP</span>` : ""}<button class="btn sm" data-gaf="${esc(id)}" type="button">Gafete</button><button class="btn sm ${tel52(a.tel)?"ghost":""}" data-edit="${esc(id)}" type="button">${tel52(a.tel)?"Editar":"Poner tel."}</button></div>`).join("") || `<div class="empty">Sin alumnos.</div>`;
+}
+function datosConc(){
+  const gs = grupos(), grados = [...new Set(gs.map(g=>g[0]))].sort();
+  const ins = {}; gs.forEach(g => ins[g] = Object.values(S.alumnos).filter(a=>a.grupo===g).length);
+  const total = Object.keys(S.alumnos).length;
+  const filas = Object.keys(S.asis).sort().reverse().map(f => {
+    const c = {}; gs.forEach(g=>c[g]=0);
+    Object.entries(S.asis[f]).forEach(([id,r]) => { const g = S.alumnos[id]?.grupo || r.g; if (c[g]!==undefined) c[g]++; });
+    const tot = Object.values(c).reduce((s,x)=>s+x,0);
+    return {f, c, tot, pct: total ? tot/total : 0};
+  });
+  return {gs, grados, ins, total, filas};
+}
+function renderConc(){
+  const {gs, grados, ins, total, filas} = datosConc();
+  $("#kIns").textContent = total; $("#kDias").textContent = filas.length;
+  { const al = Object.entries(S.alumnos), reg = hoyReg(), cnt = (sx, hoy) => al.filter(([id,a]) => a.sexo===sx && (!hoy || reg[id])).length;
+    const H = cnt("H"), M = cnt("M"), Hh = cnt("H",1), Mh = cnt("M",1), sin = al.filter(([,a]) => a.sexo!=="H" && a.sexo!=="M").length;
+    $("#kH").textContent = H; $("#kM").textContent = M; $("#kP").textContent = Hh + Mh;
+    $("#kHh").textContent = `${Hh} presentes hoy`; $("#kMh").textContent = `${Mh} presentes hoy`;
+    $("#kPh").textContent = sin ? `${sin} alumno(s) sin sexo registrado` : `${Hh} H · ${Mh} M`; }
+  const u = filas.slice(0,7); $("#kProm").textContent = u.length ? Math.round(u.reduce((s,r)=>s+r.pct,0)/u.length*100)+"%" : "—";
+  const sum = (o,gr) => gs.filter(g=>g[0]===gr).reduce((s,g)=>s+(o[g]||0),0);
+  const cols = o => grados.map(gr => gs.filter(g=>g[0]===gr).map(g=>`<td>${o[g]}</td>`).join("") + `<td class="gr">${sum(o,gr)}</td>`).join("");
+  let h = `<thead><tr><th>Fecha</th>${grados.map(gr => gs.filter(g=>g[0]===gr).map(g=>`<th>${esc(g)}</th>`).join("")+`<th class="gr">${gr}° total</th>`).join("")}<th>Total</th><th>%</th></tr></thead><tbody>`;
+  h += `<tr class="ins"><td>Inscritos</td>${cols(ins)}<td>${total}</td><td></td></tr>`;
+  const porSexo = sx => { const o = {}; gs.forEach(g => o[g] = Object.values(S.alumnos).filter(a => a.grupo===g && a.sexo===sx).length); return o; };
+  const oH = porSexo("H"), oM = porSexo("M");
+  h += `<tr class="ins"><td>· Hombres</td>${cols(oH)}<td>${Object.values(oH).reduce((s,x)=>s+x,0)}</td><td></td></tr>`;
+  h += `<tr class="ins"><td>· Mujeres</td>${cols(oM)}<td>${Object.values(oM).reduce((s,x)=>s+x,0)}</td><td></td></tr>`;
+  h += filas.map(r => { const p=Math.round(r.pct*100), k=p>=85?"hi":p>=70?"mid":"lo"; return `<tr><td>${fCorta(r.f)}</td>${cols(r.c)}<td><b>${r.tot}</b></td><td class="pct ${k}">${p}%</td></tr>`; }).join("");
+  if (!filas.length) h += `<tr><td colspan="99" style="position:static;color:var(--muted)">Aún no hay días registrados.</td></tr>`;
+  $("#tabla").innerHTML = h + "</tbody>";
+}
+
+
+/* ---------- Faltas y seguimiento ---------- */
+let PER = "sem";
+document.querySelectorAll("[data-per]").forEach(b => b.addEventListener("click", () => { PER = b.dataset.per; document.querySelectorAll("[data-per]").forEach(x => x.setAttribute("aria-pressed", x===b)); renderFaltas(); }));
+const dUTC = f => { const [y,m,d] = f.split("-").map(Number); return new Date(Date.UTC(y,m-1,d)); };
+const lunes = f => { const d = dUTC(f), w = (d.getUTCDay()+6)%7; d.setUTCDate(d.getUTCDate()-w); return d.toISOString().slice(0,10); };
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function diasClase(){ const hoy = ahora().fecha; return Object.keys(S.asis).filter(f => f <= hoy && Object.keys(S.asis[f]).length).sort(); }
+function enPeriodo(f){ const hoy = ahora().fecha; if (PER==="sem") return lunes(f)===lunes(hoy); if (PER==="mes") return f.slice(0,7)===hoy.slice(0,7); return true; }
+function cuenta(a, f){ if (a.alta && f < a.alta) return false; const i = inicioDe(a.grupo); return !(i && f < i); }
+/* v25: inicio del control por grupo (lo pone la administración y llega por Drive a todos los celulares) */
+function inicioDe(g){ return !S.inicio ? "" : (S.inicio[g] || "9999-12-31"); }
+function aplicarInicio(ini){
+  const nuevo = ini && typeof ini === "object" ? ini : null;
+  if (JSON.stringify(nuevo) === JSON.stringify(S.inicio || null)) return 0;
+  S.inicio = nuevo; if (!nuevo) { guardar(); return 0; }
+  let n = 0; const antes = (id, f) => { const a = alu(id), i = a && nuevo[a.grupo]; return !!i && f < i; };   // "Sin iniciar" no borra nada
+  [S.asis, S.otros || {}, S.just || {}].forEach(T => Object.keys(T).forEach(f => { Object.keys(T[f]).forEach(id => { if (antes(id, f)) { delete T[f][id]; n++; } }); if (!Object.keys(T[f]).length) delete T[f]; }));
+  S.cola = S.cola.filter(r => !(r.fecha && r.id && antes(r.id, r.fecha) && (!r.tipo || /entrada|salida|aviso|just/.test(r.tipo))));
+  guardar(); return n;
+}
+function faltasDe(dias){ // {id: [fechas de falta]}
+  const r = {}; Object.entries(S.alumnos).forEach(([id,a]) => { r[id] = dias.filter(f => cuenta(a,f) && !S.asis[f][id] && !justi(f,id)); }); return r; }
+function msgFalta(a, txt){ const t = tel52(a.tel); if (!t) return `<span class="chip">Sin tel.</span>`;
+  return `<a class="btn sm wa" href="https://wa.me/${t.replace("+","")}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">Avisar</a>`; }
+function barrasH(datos, max){ // [{l, v, s}] gráfica horizontal
+  if (!datos.length) return `<div class="empty">Sin datos todavía.</div>`;
+  const W = 340, rowH = 26, H = datos.length*rowH + 6, x0 = 44, m = Math.max(1, max ?? Math.max(...datos.map(d=>d.v)));
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">${datos.map((d,i) => { const w = Math.max(d.v ? 3 : 0, (W-x0-56)*d.v/m), y = i*rowH+4;
+    return `<text class="lbl" x="0" y="${y+15}">${esc(d.l)}</text><rect x="${x0}" y="${y+3}" width="${W-x0-56}" height="16" rx="5" fill="var(--line)"/><rect x="${x0}" y="${y+3}" width="${w}" height="16" rx="5" fill="${d.c||"var(--brass)"}"/><text x="${x0+w+6}" y="${y+15}">${esc(d.s)}</text>`; }).join("")}</svg>`; }
+function barrasV(datos){ // % asistencia por día
+  if (!datos.length) return `<div class="empty">Sin datos todavía.</div>`;
+  const W = 340, H = 170, top = 14, bot = 30, left = 28, bw = (W-left-4)/datos.length;
+  let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img">`;
+  [0,50,100].forEach(v => { const y = top + (H-top-bot)*(1-v/100); s += `<line x1="${left}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="0" y="${y+4}">${v}%</text>`; });
+  datos.forEach((d,i) => { const h = (H-top-bot)*d.v/100, x = left + i*bw + bw*0.15, y = H-bot-h, c = d.v>=85?"var(--ok)":d.v>=70?"var(--warn)":"var(--bad)";
+    s += `<rect x="${x}" y="${y}" width="${bw*0.7}" height="${h}" rx="3" fill="${c}"><title>${d.l}: ${d.v}%</title></rect>`;
+    if (i%Math.ceil(datos.length/6)===0) s += `<text x="${x+bw*0.35}" y="${H-bot+14}" text-anchor="middle">${d.l}</text>`;
+    if (i===datos.length-1) s += `<text class="lbl" x="${x+bw*0.35}" y="${y-4}" text-anchor="middle">${d.v}%</text>`; });
+  return s + `</svg>`; }
+function tablaFaltas(claves, etq, dias){
+  const gs = grupos(); if (!claves.length) return `<tr><td style="position:static;color:var(--muted)">Sin días de clase registrados.</td></tr>`;
+  let h = `<thead><tr><th>${etq}</th>${gs.map(g=>`<th>${esc(g)}</th>`).join("")}<th>Total</th></tr></thead><tbody>`;
+  claves.forEach(([k, lab]) => { const ds = dias.filter(f => f.startsWith(k) || lunes(f)===k); let tot = 0;
+    const celdas = gs.map(g => { let n = 0; Object.entries(S.alumnos).forEach(([id,a]) => { if (a.grupo===g) ds.forEach(f => { if (cuenta(a,f) && !S.asis[f][id] && !justi(f,id)) n++; }); }); tot += n; return `<td>${n}</td>`; }).join("");
+    h += `<tr><td>${lab}<br><span class="note">${ds.length} día(s)</span></td>${celdas}<td><b>${tot}</b></td></tr>`; });
+  return h + "</tbody>"; }
+function renderFaltas(){
+  if (!$("#v-falt")) return;
+  const hoy = ahora().fecha, todos = diasClase(), dias = todos.filter(enPeriodo), F = faltasDe(dias);
+  const nAl = Object.keys(S.alumnos).length, posibles = dias.reduce((s,f) => s + Object.values(S.alumnos).filter(a=>cuenta(a,f)).length, 0);
+  const totF = Object.values(F).reduce((s,x)=>s+x.length,0);
+  const nJ = dias.reduce((s,f) => s + Object.keys((S.just||{})[f]||{}).filter(id => S.alumnos[id] && !S.asis[f][id]).length, 0);
+  $("#fK1").textContent = dias.length; $("#fK2").innerHTML = totF + (nJ ? `<span style="font-size:13px;font-weight:600;color:var(--muted)"> +${nJ} just.</span>` : ""); $("#fK3").textContent = posibles ? Math.round((1-totF/posibles)*100)+"%" : "—";
+  const perTxt = {sem:"esta semana", mes:"en "+MESES[+hoy.slice(5,7)-1], todo:"en todo el ciclo"}[PER];
+  $("#fPerTxt").textContent = perTxt; $("#fDias").textContent = `${todos.length} día(s) de clase registrados`;
+  // faltas por grupo
+  const gs = grupos(), datosG = gs.map(g => { const ids = Object.keys(S.alumnos).filter(id=>S.alumnos[id].grupo===g);
+    const n = ids.reduce((s,id)=>s+F[id].length,0), pos = dias.reduce((s,f)=>s+ids.filter(id=>cuenta(S.alumnos[id],f)).length,0);
+    return {l:g, v:n, s:`${n} · ${pos?Math.round(n/pos*100):0}%`, c: pos && n/pos>0.3 ? "var(--bad)" : "var(--brass)"}; });
+  $("#fChartG").innerHTML = barrasH(datosG);
+  // asistencia por día
+  $("#fChartD").innerHTML = barrasV(todos.slice(-20).map(f => { const pos = Object.values(S.alumnos).filter(a=>cuenta(a,f)).length, pr = Object.keys(S.asis[f]).filter(id=>S.alumnos[id]).length;
+    return {l:`${f.slice(8)}/${f.slice(5,7)}`, v: pos ? Math.round(pr/pos*100) : 0}; }));
+  // alertas: faltas seguidas (días anteriores a hoy)
+  const prev = todos.filter(f => f < hoy), alertas = [];
+  Object.entries(S.alumnos).forEach(([id,a]) => { let n = 0; for (let i = prev.length-1; i >= 0; i--) { const f = prev[i]; if (!cuenta(a,f)) break; if (justi(f,id)) continue; if (S.asis[f][id]) break; n++; }
+    if (n >= 3) alertas.push({id, a, n}); });
+  alertas.sort((x,y)=>y.n-x.n || ordG(x.a.grupo,y.a.grupo));
+  $("#fAlertas").innerHTML = alertas.length ? `<details class="panel alert" open><summary>⚠ ${alertas.length} alumno(s) con 3 o más faltas seguidas</summary>${alertas.slice(0,60).map(x =>
+    `<div class="li"><div class="av s">${esc(ini(x.a.nombre))}</div><div class="t"><b>${esc(x.a.nombre)}</b><span>${esc(x.a.grupo)} · ${x.n} días seguidos sin asistir</span></div><button class="btn sm ghost" data-just="${esc(x.id)}" type="button">Justificar</button>${msgFalta(x.a, `${ESCUELA}: Le informamos que su hijo(a) ${x.a.nombre} (${x.a.grupo}) acumula ${x.n} días seguidos sin asistir a clases. Le pedimos comunicarse con la escuela. Gracias.`)}</div>`).join("")}</details>`
+    : (prev.length ? `<div class="panel pad"><b>Sin alertas</b><span class="note">Ningún alumno tiene 3 o más faltas seguidas.</span></div>` : "");
+  // sin registro hoy
+  const regHoy = S.asis[hoy] || {}, sin = Object.entries(S.alumnos).filter(([id]) => !regHoy[id]).sort((a,b)=>ordG(a[1].grupo,b[1].grupo)||a[1].nombre.localeCompare(b[1].nombre));
+  $("#fHoyBox").hidden = !Object.keys(regHoy).length;
+  $("#fHoyT").textContent = `${sin.length} alumno(s) sin registro hoy`;
+  $("#fHoy").innerHTML = sin.map(([id,a]) => `<div class="li"><div class="av s">${esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)}${justi(hoy,id)?" · justificada":""}</span></div><button class="btn sm ghost" data-just="${esc(id)}" type="button">Justificar</button>${msgFalta(a, `${ESCUELA}: Le informamos que su hijo(a) ${a.nombre} (${a.grupo}) no registró asistencia hoy ${fCorta(hoy)}. Si fue un error, comuníquese con la escuela. Gracias.`)}</div>`).join("") || `<div class="empty">Todos registrados.</div>`;
+  // top
+  const top = Object.entries(F).filter(([,x])=>x.length).sort((a,b)=>b[1].length-a[1].length || ordG(S.alumnos[a[0]].grupo,S.alumnos[b[0]].grupo)).slice(0,25);
+  $("#fTop").innerHTML = top.map(([id,x]) => { const a = S.alumnos[id]; return `<div class="li"><div class="av s">${esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)} · ${x.length} de ${dias.filter(f=>cuenta(a,f)).length} días ${perTxt}</span></div><button class="btn sm ghost" data-just="${esc(id)}" type="button">Justificar</button><span class="chip ${x.length>=3?"warn":""}">${x.length}</span></div>`; }).join("") || `<div class="empty">Sin faltas ${perTxt}.</div>`;
+  renderRiesgo();
+  // tablas
+  const semanas = [...new Set(todos.map(lunes))].sort().reverse().map(k => [k, `Sem. del ${fCorta(k).slice(0,5)}`]);
+  const meses = [...new Set(todos.map(f=>f.slice(0,7)))].sort().reverse().map(k => [k, MESES[+k.slice(5)-1].replace(/^./,c=>c.toUpperCase())+" "+k.slice(0,4)]);
+  $("#fSem").innerHTML = tablaFaltas(semanas, "Semana", todos);
+  $("#fMes").innerHTML = tablaFaltas(meses, "Mes", todos);
+}
+
+
+/* =================== v18: configuración, modos, justificaciones, riesgo, juntas, cuotas, avisos, PIN =================== */
+function cfg(){ S.cfg = Object.assign({entrada:"18:00", tol:15, salida:"21:30"}, S.cfg||{}); return S.cfg; }
+const minutos = h => { const [a,b] = String(h||"0:0").split(":").map(Number); return a*60 + (b||0); };
+const esRetardo = h => minutos(h) > minutos(cfg().entrada) + Number(cfg().tol||0);
+const esSalidaAnt = h => minutos(h) < minutos(cfg().salida) - 10;
+function justi(f, id){ return S.just && S.just[f] && S.just[f][id]; }
+function encolar(r){ S.cola.push(r); }
+
+/* ---- modos de escaneo ---- */
+const MODOS = {entrada:"Entrada", salida:"Salida", junta:"Junta de padres"};
+function modo(){ return MODOS[S.modo] ? S.modo : "entrada"; }
+function renderModos(){
+  const box = $("#modos"); if (!box) return;
+  box.innerHTML = Object.entries(MODOS).map(([k,v]) => `<button type="button" data-modo="${k}" aria-pressed="${modo()===k}">${({entrada:"Entrada",salida:"Salida",junta:"Junta",cuota:"Cuota"})[k]}</button>`).join("");
+  const j = S.juntaActiva && S.juntas && S.juntas[S.juntaActiva];
+  $("#modoInfo").textContent = modo()==="junta" ? (j ? `Junta: ${j.t} (${fCorta(j.f)})` : "Primero crea la junta en la pestaña Padres")
+    : modo()==="cuota" ? (conceptoActivo() ? `Cuota: ${conceptoActivo().c} · $${conceptoActivo().monto}` : "Primero agrega una cuota en la pestaña Padres")
+    : modo()==="salida" ? `Salida anticipada antes de las ${cfg().salida}` : `Retardo después de las ${cfg().entrada} + ${cfg().tol} min`;
+  $("#btnScanTxt").textContent = {entrada:"Escanear entrada", salida:"Escanear salida", junta:"Escanear asistencia a junta", cuota:"Escanear para cobrar"}[modo()];
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-modo]"); if (!b) return; S.modo = b.dataset.modo; guardar(); renderModos(); });
+
+function procesarId(id){ // según el modo
+  const m = modo();
+  if (!S.alumnos[id] && S.tok && (Array.isArray(S.alcance) || (S.dir && S.dir[id])) && /^[\w-]{3,20}$/.test(id)) return registrarOtro(id, m);
+  if (m === "salida") return registrarSalida(id);
+  if (m === "junta") return registrarJunta(id);
+  if (m === "cuota") { cerrarCam(); setTimeout(() => cobrar(id), 50); return {tipo:"info", id}; }
+  return registrar(id);
+}
+
+/* ---- alumno de un grupo que este celular no tiene: se registra sin mostrar sus datos ---- */
+function registrarOtro(id, m){
+  const {fecha, hora} = ahora(); S.otros = S.otros || {};
+  const d = alu(id), nom = d ? d.nombre : "", gru = d ? d.grupo : "";
+  Object.keys(S.otros).forEach(f => { if (f < fecha) delete S.otros[f]; });
+  const o = (S.otros[fecha] = S.otros[fecha] || {});
+  if (m === "salida") {
+    if (!o[id]) return {tipo:"err", id: d ? id : undefined, extra:`${d ? "" : "Matrícula " + id + " (otro grupo): "}no tiene entrada registrada en este celular.`};
+    if (o[id].s) return d ? {tipo:"dup", id, fecha, hora:o[id].s, modo:"salida"} : {tipo:"err", extra:`Matrícula ${id} (otro grupo): ya tenía salida registrada a las ${o[id].s}.`};
+    o[id].s = hora; if (esSalidaAnt(hora)) o[id].sa = 1; encolar({tipo:"salida", rid:`${fecha}_${id}_s`, fecha, hora, id, nombre:nom, grupo:gru, sa:o[id].sa?1:0});
+  } else if (m === "junta") {
+    const j = S.juntaActiva && S.juntas && S.juntas[S.juntaActiva];
+    if (!j) return {tipo:"err", extra:"No hay junta activa. Créala en la pestaña Padres."};
+    if (j.a[id]) return d ? {tipo:"dup", id, fecha, hora:j.a[id], modo:"junta"} : {tipo:"err", extra:`Matrícula ${id} (otro grupo): ya estaba registrado en la junta.`};
+    j.a[id] = hora; encolar({tipo:"junta", rid:`${S.juntaActiva}_${id}`, junta:j.t, fechaJunta:j.f, fecha, hora, id, nombre:nom, grupo:gru});
+  } else {
+    if (o[id]) return d ? {tipo:"dup", id, fecha, hora:o[id].h} : {tipo:"err", extra:`Matrícula ${id} (otro grupo): ya estaba registrado hoy a las ${o[id].h}.`};
+    o[id] = {h:hora}; if (esRetardo(hora)) o[id].r = 1; S.cola.push({rid:`${fecha}_${id}`, fecha, hora, id, nombre:nom, grupo:gru, r:o[id].r?1:0});
+  }
+  guardar(); sincronizar(); renderSmsBox();
+  if (d) return {tipo:"ok", id, fecha, hora, modo: m === "entrada" ? undefined : m};
+  return {tipo:"ok", extra:`Matrícula ${id} · alumno de otro grupo. Quedó registrado y se enviará a Drive. Este celular no tiene los datos de su familia, así que no se le envía aviso desde aquí.`, modo: m === "entrada" ? undefined : m};
+}
+
+/* ---- salida ---- */
+function registrarSalida(id){
+  const a = S.alumnos[id]; if (!a) return {tipo:"err", extra:`El código ${id} no corresponde a ningún alumno.`};
+  const {fecha, hora} = ahora(), r = (S.asis[fecha]||{})[id];
+  if (!r) return {tipo:"err", id, extra:`${a.nombre} no tiene entrada registrada hoy. Cambia a modo Entrada para registrarlo.`};
+  if (r.s) return {tipo:"dup", id, fecha, hora:r.s, modo:"salida"};
+  r.s = hora; if (esSalidaAnt(hora)) r.sa = 1;
+  encolar({tipo:"salida", rid:`${fecha}_${id}_s`, fecha, hora, id, nombre:a.nombre, grupo:a.grupo, sa:r.sa?1:0});
+  guardar(); render(); sincronizar();
+  return {tipo:"ok", id, fecha, hora, modo:"salida"};
+}
+
+/* ---- justificaciones ---- */
+const MOTIVOS_J = ["Trabajo", "Salud", "Asunto familiar", "Trámite o cita", "Otro"];
+function justificar(id, fechaIni){
+  const a = S.alumnos[id]; if (!a) return;
+  const hoy = ahora().fecha, dias = diasClase().filter(f => cuenta(a,f) && !S.asis[f][id]).slice(-30).reverse();
+  if (!dias.includes(hoy)) dias.unshift(hoy);
+  const f0 = fechaIni && dias.includes(fechaIni) ? fechaIni : (dias.find(f => !justi(f,id)) || dias[0]);
+  abrir(`<div class="sh"><h2>Justificar falta</h2><span class="chip">${esc(a.grupo)}</span></div>
+    <div class="who"><div class="av">${esc(ini(a.nombre))}</div><div><div class="n">${esc(a.nombre)}</div><div class="m">Las faltas justificadas no cuentan en alertas ni en el semáforo.</div></div></div>
+    <form id="fj" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f">Día<select class="input" id="jF">${dias.map(f => `<option value="${f}" ${f===f0?"selected":""}>${fLarga(f)}${justi(f,id)?" · justificada ("+esc(justi(f,id).m)+")":""}</option>`).join("")}</select></label>
+      <label class="f">Motivo<select class="input" id="jM">${MOTIVOS_J.map(m=>`<option>${m}</option>`).join("")}</select></label>
+      <label class="f">Nota (opcional)<input class="input" id="jN" placeholder="Ej. avisó la mamá por WhatsApp" autocomplete="off"></label>
+      <div class="row"><button class="btn pri" type="submit">Guardar</button><button class="btn" type="button" id="jQ">Quitar justificación</button><button class="btn ghost" type="button" id="jX">Cerrar</button></div>
+    </form>`);
+  const pon = () => { const j = justi($("#jF").value, id); $("#jM").value = j ? j.m : MOTIVOS_J[0]; $("#jN").value = j ? j.n : ""; $("#jQ").hidden = !j; };
+  $("#jF").addEventListener("change", pon); pon();
+  $("#jX").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#jQ").addEventListener("click", () => { const f = $("#jF").value; if (S.just && S.just[f]) delete S.just[f][id];
+    encolar({tipo:"just", rid:`j_${f}_${id}`, fecha:f, id, nombre:a.nombre, grupo:a.grupo, borrar:1}); guardar(); render(); sincronizar(); $("#modal").innerHTML = ""; toast("Justificación quitada"); });
+  $("#fj").addEventListener("submit", ev => { ev.preventDefault(); const f = $("#jF").value, m = $("#jM").value, n = $("#jN").value.trim();
+    S.just = S.just || {}; S.just[f] = S.just[f] || {}; S.just[f][id] = {m, n};
+    encolar({tipo:"just", rid:`j_${f}_${id}`, fecha:f, id, nombre:a.nombre, grupo:a.grupo, motivo:m, nota:n}); guardar(); render(); sincronizar(); $("#modal").innerHTML = ""; toast(`Falta del ${fCorta(f)} justificada`); });
+}
+
+/* ---- semáforo de riesgo de abandono ---- */
+function riesgo(id){
+  const a = S.alumnos[id], hoy = ahora().fecha;
+  const prev = diasClase().filter(f => f < hoy && cuenta(a,f));
+  if (prev.length < 3) return {n:"sd", p:0, m:["Pocos días de clase registrados"]};
+  const vino = f => !!S.asis[f][id], val = prev.filter(f => !justi(f,id));
+  let seg = 0; for (let i = prev.length-1; i >= 0; i--) { const f = prev[i]; if (justi(f,id)) continue; if (vino(f)) break; seg++; }
+  const u10 = val.slice(-10), pct10 = u10.length ? u10.filter(vino).length/u10.length : 1;
+  const w1 = val.slice(-8), w0 = val.slice(-16,-8), pc = d => d.length ? d.filter(vino).length/d.length : 1;
+  const caida = w0.length >= 4 ? pc(w0) - pc(w1) : 0;
+  const ret = prev.slice(-10).filter(f => S.asis[f][id] && S.asis[f][id].r).length;
+  const sa = prev.slice(-10).filter(f => S.asis[f][id] && S.asis[f][id].sa).length;
+  let p = 0; const m = [];
+  if (seg >= 3) { p += 40; m.push(`${seg} faltas seguidas`); } else if (seg === 2) { p += 20; m.push("2 faltas seguidas"); }
+  if (pct10 < 0.6) { p += 30; m.push(`asistió ${Math.round(pct10*100)}% de los últimos días`); } else if (pct10 < 0.8) { p += 15; m.push(`asistió ${Math.round(pct10*100)}% de los últimos días`); }
+  if (caida >= 0.25) { p += 20; m.push(`su asistencia bajó ${Math.round(caida*100)} puntos`); }
+  if (ret >= 3) { p += 10; m.push(`${ret} retardos recientes`); }
+  if (sa >= 3) { p += 10; m.push(`${sa} salidas anticipadas`); }
+  if (!tel52(a.tel)) { p += 10; m.push("sin teléfono del tutor"); }
+  return {n: p >= 50 ? "rojo" : p >= 25 ? "amarillo" : "verde", p, m};
+}
+const PUNTO = {rojo:"🔴", amarillo:"🟡", verde:"🟢", sd:"⚪"};
+function renderRiesgo(){
+  const box = $("#fRiesgo"); if (!box) return;
+  const R = Object.keys(S.alumnos).map(id => ({id, a:S.alumnos[id], r:riesgo(id)}));
+  const c = {rojo:0, amarillo:0, verde:0, sd:0}; R.forEach(x => c[x.r.n]++);
+  const lista = R.filter(x => x.r.n==="rojo" || x.r.n==="amarillo").sort((x,y) => y.r.p - x.r.p || ordG(x.a.grupo,y.a.grupo));
+  box.innerHTML = `<div class="panel pad"><div class="sh"><h2>Semáforo de riesgo de abandono</h2><p>con lo escaneado en este celular</p></div>
+    <div class="row">${["rojo","amarillo","verde"].map(n => `<span class="chip" style="font-size:14px;padding:8px 12px">${PUNTO[n]} ${c[n]} ${n==="rojo"?"alto":n==="amarillo"?"medio":"bajo"}</span>`).join("")}${c.sd?`<span class="chip">⚪ ${c.sd} sin datos</span>`:""}</div>
+    <p class="note">Toma en cuenta faltas seguidas, cómo va su asistencia, si bajó en las últimas dos semanas, retardos, salidas anticipadas y si hay teléfono del tutor. Las faltas justificadas no cuentan.</p></div>
+    ${lista.length ? `<details class="panel" ${c.rojo?"open":""}><summary>${c.rojo} en riesgo alto · ${c.amarillo} en riesgo medio</summary>${lista.slice(0,80).map(x =>
+      `<div class="li"><div class="av s">${PUNTO[x.r.n]}</div><div class="t"><b>${esc(x.a.nombre)}</b><span>${esc(x.a.grupo)} · ${esc(x.r.m.join(", "))}</span></div><button class="btn sm ghost" data-just="${esc(x.id)}" type="button">Justificar</button>${msgFalta(x.a, `${ESCUELA}: Nos interesa que ${x.a.nombre} (${x.a.grupo}) continúe sus estudios. Hemos notado faltas recientes; le pedimos comunicarse con la escuela para apoyarle. Gracias.`)}</div>`).join("")}</details>` : ""}`;
+}
+
+/* ---- juntas de padres ---- */
+function registrarJunta(id){
+  const a = S.alumnos[id]; if (!a) return {tipo:"err", extra:`El código ${id} no corresponde a ningún alumno.`};
+  const j = S.juntaActiva && S.juntas && S.juntas[S.juntaActiva];
+  if (!j) return {tipo:"err", id, extra:"No hay junta activa. Créala en la pestaña Padres."};
+  const {fecha, hora} = ahora();
+  if (j.a[id]) return {tipo:"dup", id, fecha, hora:j.a[id], modo:"junta"};
+  j.a[id] = hora;
+  encolar({tipo:"junta", rid:`${S.juntaActiva}_${id}`, junta:j.t, fechaJunta:j.f, fecha, hora, id, nombre:a.nombre, grupo:a.grupo});
+  guardar(); renderPadres(); sincronizar();
+  return {tipo:"ok", id, fecha, hora, modo:"junta"};
+}
+function nuevaJunta(){
+  abrir(`<div class="sh"><h2>Nueva junta de padres</h2></div>
+    <form id="fJ" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f">Nombre de la junta<input class="input" id="jT" placeholder="Ej. Entrega de boletas 1er trimestre" required autocomplete="off"></label>
+      <label class="f">Fecha<input class="input" id="jD" type="date" value="${ahora().fecha}" required></label>
+      <p class="note">Al crearla, la app queda en modo “Junta”: escanea el gafete del alumno cuando llegue su papá o mamá.</p>
+      <div class="row"><button class="btn pri" type="submit">Crear y empezar</button><button class="btn" type="button" id="jX2">Cancelar</button></div></form>`);
+  $("#jX2").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#fJ").addEventListener("submit", ev => { ev.preventDefault(); const jid = "J" + Date.now().toString(36).toUpperCase();
+    S.juntas = S.juntas || {}; S.juntas[jid] = {t:$("#jT").value.trim(), f:$("#jD").value, a:{}}; S.juntaActiva = jid; S.modo = "junta";
+    guardar(); $("#modal").innerHTML = ""; renderModos(); renderPadres(); toast("Junta creada: escanea los gafetes"); });
+}
+function verJunta(jid){
+  const j = S.juntas[jid]; if (!j) return;
+  const gs = grupos(), falt = Object.entries(S.alumnos).filter(([id]) => !j.a[id]).sort((x,y)=>ordG(x[1].grupo,y[1].grupo)||x[1].nombre.localeCompare(y[1].nombre));
+  abrir(`<div class="sh"><h2>${esc(j.t)}</h2><span class="chip">${fCorta(j.f)}</span></div>
+    ${barrasH(gs.map(g => { const ids = Object.keys(S.alumnos).filter(id=>S.alumnos[id].grupo===g), n = ids.filter(id=>j.a[id]).length; return {l:g, v: ids.length ? Math.round(n/ids.length*100) : 0, s:`${n}/${ids.length}`}; }), 100)}
+    <div class="row"><button class="btn pri" id="vjAct" type="button">${S.juntaActiva===jid?"Junta activa ✓":"Seguir registrando esta junta"}</button><button class="btn" id="vjCsv" type="button">Descargar lista (Excel)</button></div>
+    <details class="panel"><summary>${falt.length} sin asistir</summary>${falt.map(([id,a]) => `<div class="li"><div class="av s">${esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)}</span></div>${msgFalta(a, `${ESCUELA}: No nos fue posible verle en la reunión "${j.t}" del ${fCorta(j.f)} sobre su hijo(a) ${a.nombre} (${a.grupo}). Le pedimos acudir a la escuela o comunicarse con nosotros. Gracias.`)}</div>`).join("")}</details>
+    <button class="btn block" id="vjX" type="button">Cerrar</button>`);
+  $("#vjX").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#vjAct").addEventListener("click", () => { S.juntaActiva = jid; S.modo = "junta"; guardar(); renderModos(); $("#modal").innerHTML = ""; toast("Modo junta activo"); });
+  $("#vjCsv").addEventListener("click", () => { const q = v => `"${String(v).replace(/"/g,'""')}"`;
+    const L = [[`${j.t} · ${fCorta(j.f)} · ${ESCUELA}`],[],["Grupo","Alumno","Asistió","Hora"]];
+    Object.entries(S.alumnos).sort((x,y)=>ordG(x[1].grupo,y[1].grupo)||x[1].nombre.localeCompare(y[1].nombre)).forEach(([id,a]) => L.push([a.grupo,a.nombre,j.a[id]?"Sí":"No",j.a[id]||""]));
+    entregar(`Junta ${j.t} ${j.f}.csv`, "﻿"+L.map(r=>r.map(q).join(",")).join("\r\n"), "text/csv"); });
+}
+
+/* ---- cuotas ---- */
+function cuotas(){ S.cuotas = S.cuotas || {conceptos:[], pagos:{}, activa:""}; return S.cuotas; }
+function conceptoActivo(){ const c = cuotas(); return c.conceptos.find(x => x.id===c.activa) || c.conceptos[0]; }
+function pagado(id, cid){ return Object.values(cuotas().pagos).filter(p => p.id===id && p.cid===cid).reduce((s,p)=>s+Number(p.m||0),0); }
+function nuevaCuota(){
+  abrir(`<div class="sh"><h2>Nueva cuota</h2></div>
+    <form id="fC" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f">Concepto<input class="input" id="cC" placeholder="Ej. Cuota voluntaria APF 2026-2027" required autocomplete="off"></label>
+      <label class="f">Monto por alumno ($)<input class="input" id="cM" type="number" min="1" step="1" inputmode="numeric" required></label>
+      <div class="row"><button class="btn pri" type="submit">Guardar</button><button class="btn" type="button" id="cX">Cancelar</button></div></form>`);
+  $("#cX").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#fC").addEventListener("submit", ev => { ev.preventDefault(); const c = cuotas(), id = "C" + Date.now().toString(36).toUpperCase();
+    c.conceptos.push({id, c:$("#cC").value.trim(), monto:Number($("#cM").value)}); c.activa = id; guardar(); $("#modal").innerHTML = ""; renderPadres(); renderModos(); toast("Cuota agregada"); });
+}
+function cobrar(id){
+  const a = S.alumnos[id], c = conceptoActivo(); if (!a) return;
+  if (!c) { toast("Primero agrega una cuota en la pestaña Padres"); return; }
+  const ya = pagado(id, c.id), resta = Math.max(0, c.monto - ya);
+  abrir(`<div class="sh"><h2>Cobro de cuota</h2><span class="chip ${resta? "warn":"ok"}">${resta ? `Debe $${resta}` : "Pagado ✓"}</span></div>
+    <div class="who"><div class="av">${esc(ini(a.nombre))}</div><div><div class="n">${esc(a.nombre)}</div><div class="m">${esc(a.grupo)} · ${esc(c.c)} · $${c.monto}</div></div></div>
+    <form id="fP" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f">Monto recibido ($)<input class="input" id="pM" type="number" min="1" step="1" inputmode="numeric" value="${resta||""}" ${resta?"":"disabled"}></label>
+      <div class="row"><button class="btn pri" type="submit" ${resta?"":"disabled"}>Registrar pago</button><button class="btn" type="button" id="pX">Cerrar</button></div></form>
+    ${Object.entries(cuotas().pagos).filter(([,p])=>p.id===id && p.cid===c.id).map(([pid,p]) => `<div class="li"><div class="t"><b>$${p.m}</b><span>${fCorta(p.f)} · ${p.h}</span></div><button class="btn sm ghost" data-delpago="${pid}" type="button">Anular</button></div>`).join("")}`);
+  $("#pX").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#fP").addEventListener("submit", ev => { ev.preventDefault(); const m = Number($("#pM").value); if (!(m > 0)) return;
+    const {fecha, hora} = ahora(), pid = "P" + Date.now().toString(36).toUpperCase();
+    cuotas().pagos[pid] = {id, cid:c.id, m, f:fecha, h:hora};
+    encolar({tipo:"pago", rid:pid, fecha, hora, id, nombre:a.nombre, grupo:a.grupo, concepto:c.c, monto:m, montoCuota:c.monto});
+    guardar(); renderPadres(); sincronizar(); $("#modal").innerHTML = ""; toast(`Pago de $${m} registrado: ${a.nombre}`); });
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-delpago]"); if (!b) return;
+  if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = "¿Anular? Toca otra vez"; return; }
+  const p = cuotas().pagos[b.dataset.delpago], a = S.alumnos[p.id] || {}; delete cuotas().pagos[b.dataset.delpago];
+  encolar({tipo:"pago", rid:b.dataset.delpago, id:p.id, nombre:a.nombre, grupo:a.grupo, borrar:1}); guardar(); renderPadres(); sincronizar(); $("#modal").innerHTML = ""; toast("Pago anulado"); });
+
+/* ---- avisos a padres por grupo ---- */
+const PLANTILLAS = {
+  "Junta": g => `${ESCUELA}: Se le cita a reunión de padres de familia el día ___ a las ___ hrs. Su asistencia es muy importante. Gracias.`,
+  "Suspensión de clases": g => `${ESCUELA}: Le informamos que el día ___ no habrá clases por ___. Las clases se reanudan el día ___. Gracias.`,
+  "Entrega de boletas": g => `${ESCUELA}: Le invitamos a la entrega de boletas el día ___ a las ___ hrs. Es indispensable su asistencia. Gracias.`,
+  "Otro": g => `${ESCUELA}: `
+};
+function nuevoAviso(){
+  const gs = grupos();
+  abrir(`<div class="sh"><h2>Aviso a padres</h2></div>
+    <form id="fA" style="display:flex;flex-direction:column;gap:10px">
+      <div class="f">Grupos<div class="seg" id="aG">${gs.map(g=>`<button type="button" data-ag="${g}" aria-pressed="false">${g}</button>`).join("")}<button type="button" data-ag="*" aria-pressed="false">Todos</button></div></div>
+      <label class="f">Tipo de aviso<select class="input" id="aT">${Object.keys(PLANTILLAS).map(k=>`<option>${k}</option>`).join("")}</select></label>
+      <label class="f">Mensaje (cambia los ___ por los datos)<textarea class="input" id="aM" style="font-family:var(--f);font-size:14px;min-height:120px"></textarea></label>
+      <p class="note" id="aN">Elige al menos un grupo.</p>
+      <div class="row"><button class="btn pri" type="submit">Preparar envío</button><button class="btn" type="button" id="aX">Cancelar</button></div></form>`);
+  const sel = new Set(), cuenta2 = () => { const n = Object.values(S.alumnos).filter(a => sel.has(a.grupo)).length, t = Object.values(S.alumnos).filter(a => sel.has(a.grupo) && tel52(a.tel)).length;
+    $("#aN").textContent = sel.size ? `${n} alumno(s), ${t} con teléfono. Se enviará uno por uno por WhatsApp.` : "Elige al menos un grupo."; };
+  $("#aM").value = PLANTILLAS["Junta"]();
+  $("#aT").addEventListener("change", () => $("#aM").value = PLANTILLAS[$("#aT").value]());
+  $("#aG").addEventListener("click", e => { const b = e.target.closest("[data-ag]"); if (!b) return;
+    if (b.dataset.ag === "*") { const all = sel.size !== gs.length; sel.clear(); if (all) gs.forEach(g=>sel.add(g)); }
+    else sel.has(b.dataset.ag) ? sel.delete(b.dataset.ag) : sel.add(b.dataset.ag);
+    $("#aG").querySelectorAll("[data-ag]").forEach(x => x.setAttribute("aria-pressed", x.dataset.ag==="*" ? sel.size===gs.length : sel.has(x.dataset.ag))); cuenta2(); });
+  $("#aX").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#fA").addEventListener("submit", ev => { ev.preventDefault(); const txt = $("#aM").value.trim();
+    if (!sel.size) { $("#aN").innerHTML = `<b style="color:var(--bad)">Elige al menos un grupo.</b>`; return; }
+    if (/___/.test(txt)) { $("#aN").innerHTML = `<b style="color:var(--bad)">Cambia los ___ por los datos del aviso.</b>`; return; }
+    const ids = Object.entries(S.alumnos).filter(([,a]) => sel.has(a.grupo) && tel52(a.tel)).sort((x,y)=>ordG(x[1].grupo,y[1].grupo)||x[1].nombre.localeCompare(y[1].nombre)).map(([id])=>id);
+    const aid = "A" + Date.now().toString(36).toUpperCase();
+    S.avisos = S.avisos || {}; S.avisos[aid] = {t:$("#aT").value, txt, g:[...sel].sort(ordG), ids, env:{}, f:ahora().fecha};
+    guardar(); renderPadres(); colaAviso(aid); });
+}
+function colaAviso(aid){
+  const v = S.avisos[aid]; if (!v) return;
+  const pend = v.ids.filter(id => !v.env[id] && S.alumnos[id]);
+  if (!pend.length) { $("#modal").innerHTML = ""; toast("Aviso enviado a todos"); renderPadres(); return; }
+  const id = pend[0], a = S.alumnos[id], t = tel52(a.tel).replace("+","");
+  abrir(`<div class="sh"><h2>Aviso: ${esc(v.t)}</h2><span class="chip">${pend.length} pendiente(s)</span></div>
+    <div class="who"><div class="av">${esc(ini(a.nombre))}</div><div><div class="n">${esc(a.tutor || "Tutor")}</div><div class="m">de ${esc(a.nombre)} · ${esc(a.grupo)}</div></div></div>
+    <a class="btn block wa" id="avWa" href="https://wa.me/${t}?text=${encodeURIComponent(v.txt)}" target="_blank" rel="noopener">Enviar por WhatsApp</a>
+    <div class="msg">${esc(v.txt)}</div>
+    <div class="row"><button class="btn" id="avSkip" type="button">Ya lo envié / saltar</button><button class="btn" id="avFin" type="button">Terminar después</button></div>`);
+  const sig = () => { v.env[id] = 1; guardar(); setTimeout(() => colaAviso(aid), 700); };
+  $("#avWa").addEventListener("click", sig); $("#avSkip").addEventListener("click", () => { v.env[id] = 1; guardar(); colaAviso(aid); });
+  $("#avFin").addEventListener("click", () => { $("#modal").innerHTML = ""; renderPadres(); });
+}
+
+/* ---- pestaña Padres ---- */
+function renderPadres(){
+  const box = $("#v-padr"); if (!box) return;
+  const av = Object.entries(S.avisos||{}).sort((x,y)=>y[0].localeCompare(x[0])).slice(0,8);
+  $("#pAvisos").innerHTML = av.length ? av.map(([aid,v]) => { const n = v.ids.filter(id=>v.env[id]).length;
+    return `<div class="li"><div class="t"><b>${esc(v.t)} · ${v.g.join(", ")}</b><span>${fCorta(v.f)} · ${n} de ${v.ids.length} enviados</span></div>${n < v.ids.length ? `<button class="btn sm" data-aviso="${aid}" type="button">Continuar</button>` : `<span class="chip ok">Listo</span>`}</div>`; }).join("") : `<div class="empty">Aún no has enviado avisos.</div>`;
+  const js = Object.entries(S.juntas||{}).sort((x,y)=>y[1].f.localeCompare(x[1].f)), tot = Object.keys(S.alumnos).length;
+  $("#pJuntas").innerHTML = js.length ? js.map(([jid,j]) => { const n = Object.keys(j.a).filter(id=>S.alumnos[id]).length;
+    return `<div class="li"><div class="t"><b>${esc(j.t)}${S.juntaActiva===jid?" · activa":""}</b><span>${fCorta(j.f)} · ${n} de ${tot} padres (${tot?Math.round(n/tot*100):0}%)</span></div><button class="btn sm" data-junta="${jid}" type="button">Ver</button></div>`; }).join("") : `<div class="empty">Sin juntas registradas.</div>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-aviso],[data-junta],[data-just]"); if (!b) return;
+  if (b.dataset.aviso) colaAviso(b.dataset.aviso); else if (b.dataset.junta) verJunta(b.dataset.junta); else justificar(b.dataset.just); });
+
+/* ---- PIN ---- */
+async function hashPin(p){
+  try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("sn1|" + p)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,"0")).join(""); }
+  catch { let h = 2166136261; for (const ch of "sn1|" + p) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return "f" + h.toString(16); }
+}
+let intentos = 0, bloqueadoHasta = 0, ocultoDesde = 0;
+function bloquear(){
+  if (!S.pin || $("#lock")) return;
+  const d = document.createElement("div"); d.id = "lock"; d.className = "lock";
+  d.innerHTML = `<div class="lockbox"><div class="crest" style="margin:0 auto">SN1</div><h2 style="color:#F4F1EA">Escribe tu PIN</h2>
+    <input id="pinIn" type="password" inputmode="numeric" maxlength="6" autocomplete="off" aria-label="PIN"><p id="pinMsg" class="note" style="color:#E2C17F"></p>
+    <button class="btn pri block" id="pinOk" type="button">Entrar</button></div>`;
+  document.body.appendChild(d); const i = $("#pinIn"); setTimeout(() => i.focus(), 50);
+  const probar = async () => { if (Date.now() < bloqueadoHasta) { $("#pinMsg").textContent = "Espera unos segundos e intenta de nuevo."; return; }
+    if (await hashPin(i.value) === S.pin) { intentos = 0; d.remove(); return; }
+    intentos++; i.value = ""; if (intentos >= 5) { bloqueadoHasta = Date.now() + 30000; intentos = 0; $("#pinMsg").textContent = "Demasiados intentos. Espera 30 segundos."; } else $("#pinMsg").textContent = "PIN incorrecto."; };
+  $("#pinOk").addEventListener("click", probar); i.addEventListener("keydown", e => { if (e.key === "Enter") probar(); });
+}
+document.addEventListener("visibilitychange", () => { if (document.hidden) ocultoDesde = Date.now(); else if (S.pin && ocultoDesde && Date.now() - ocultoDesde > 5*60*1000) bloquear(); });
+function renderAjustes2(){
+  { const ad = $("#admDisp"); if (ad) ad.innerHTML = S.tok ? `Este celular: <b>${esc(S.devNom||"")}</b> (activado${S.activado ? " el " + new Date(S.activado).toLocaleDateString("es-MX") : ""}). Para bloquear un celular perdido, cambia su Estado a “Desactivado” en la pestaña Dispositivos de la hoja.` : ""; }
+  const c = cfg(); $("#cfE").value = c.entrada; $("#cfT").value = c.tol; $("#cfS").value = c.salida;
+  $("#pinEstado").textContent = S.pin ? "La app pide PIN al abrirla y después de 5 minutos sin usarla." : "Sin PIN: cualquiera que tome el celular puede abrir la app.";
+  $("#btnPinQuitar").hidden = !S.pin;
+}
+
+/* ---------- SMS ---------- */
+const textoSMS = (a,f,h) => `${ESCUELA}: Le informamos que su hijo(a) ${a.nombre} (${a.grupo}) registró su asistencia hoy ${fCorta(f)} a las ${h}. Gracias.`;
+function bloqueWA(id, txt){ const a = alu(id), t = a && tel52(a.tel); if (!t) return "";
+  return `<a class="btn block wa" href="https://wa.me/${t.replace("+","")}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">Avisar por WhatsApp</a>`; }
+function bloqueSMS(id,f,h){
+  const a = alu(id), t = tel52(a.tel), txt = textoSMS(a,f,h);
+  if (!t) return `<div class="msg">Este alumno no tiene teléfono del tutor.${S.alumnos[id] ? " Agrégalo en la pestaña Alumnos." : " Pide a la dirección que lo agregue en la Lista oficial."}</div>`;
+  const wa = t.replace("+","");
+  return `<a class="btn block wa" data-sms="${esc(id)}" href="https://wa.me/${wa}?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.1 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3Z"/></svg>Enviar por WhatsApp</a>
+    <div class="msg">${esc(txt)}<br><span class="tel">${esc(a.tutor||"Tutor")} · ${esc(a.tel)}</span></div>
+    <a class="note" data-sms="${esc(id)}" href="sms:${t}?body=${encodeURIComponent(txt)}" style="text-align:center;color:var(--muted)">¿Sin internet o el papá no tiene WhatsApp? Enviar por SMS</a>`;
+}
+function tarjeta(tipo,id,f,h,extra,md){
+  const a = alu(id);
+  const band = tipo==="err" ? "No se pudo registrar" : md==="salida" ? (tipo==="ok"?"✓ Salida registrada":"Ya tenía salida registrada") : md==="junta" ? (tipo==="ok"?"✓ Asistencia a la junta":"Ya estaba registrado en la junta") : (tipo==="ok"?"✓ Asistencia registrada":"Ya estaba registrado hoy");
+  const reg = a && f && regDe(f, id);
+  const chips = a ? [`<span class="chip">Matrícula ${esc(id)}</span>`, `<span class="chip">${esc(String(a.grupo||"")[0]||"")}° grado · grupo ${esc(String(a.grupo||"").slice(-1))}</span>`, !S.alumnos[id]?`<span class="chip warn">Otro grupo</span>`:"", a.local?`<span class="chip warn">⚠ Sin validación en listas oficiales</span>`:"", (!md && reg && reg.r)?`<span class="chip warn">Retardo · llegó ${reg.h}</span>`:"", (md==="salida" && reg && reg.sa)?`<span class="chip warn">Salida anticipada</span>`:""].join("") : "";
+  const msg = md==="junta" ? "" : md==="salida" ? (!a ? "" : bloqueWA(id, `${ESCUELA}: Le informamos que su hijo(a) ${a&&a.nombre} (${a&&a.grupo}) registró su salida hoy ${f?fCorta(f):""} a las ${h}. Gracias.`)) : (a ? bloqueSMS(id,f,h) : "");
+  const body = a ? `<div class="who"><div class="av">${esc(ini(a.nombre))}</div><div><div class="n">${esc(a.nombre)}</div><div class="m">${esc(a.grupo)} · ${f?fCorta(f):""} · ${esc(h||"")}</div></div></div>${chips?`<div class="row">${chips}</div>`:""}${extra?`<div class="msg">${esc(extra)}</div>`:""}${msg}` : `<div class="msg">${esc(extra||"")}</div>`;
+  return `<div class="result ${tipo}"><div class="band">${band}</div><div class="body">${body}</div></div>`;
+}
+
+/* ---------- Registrar ---------- */
+function registrar(id){
+  const a = S.alumnos[id];
+  if (!a) return {tipo:"err", extra:`El código ${id} no corresponde a ningún alumno.`};
+  const {fecha, hora} = ahora();
+  S.asis[fecha] = S.asis[fecha] || {};
+  if (S.asis[fecha][id]) return {tipo:"dup", id, fecha, hora:S.asis[fecha][id].h};
+  S.asis[fecha][id] = {h:hora}; if (esRetardo(hora)) S.asis[fecha][id].r = 1;
+  S.cola.push({rid:`${fecha}_${id}`, fecha, hora, id, nombre:a.nombre, grupo:a.grupo, r:S.asis[fecha][id].r?1:0});
+  guardar(); render(); sincronizar();
+  return {tipo:"ok", id, fecha, hora};
+}
+function codigoAId(txt){
+  const s = String(txt||"").trim();
+  const m = s.match(/^SN1\|(.+)$/) || s.match(/[?&]id=([^&]+)/);
+  let id = m ? decodeURIComponent(m[1]).trim() : (S.alumnos[s] ? s : null);
+  if (id && !S.alumnos[id] && S.alias && S.alias[id]) id = S.alias[id];
+  return id;
+}
+
+/* ---------- Escáner en vivo ---------- */
+let stream = null, det = null, loop = 0, ultimo = {c:"", t:0}, cuadro = 0;
+const lienzo = document.createElement("canvas"), ctx2 = lienzo.getContext("2d", {willReadFrequently:true});
+$("#btnScan").addEventListener("click", abrirCam);
+async function prepararNativo(){
+  if (det !== null || !("BarcodeDetector" in window)) return;
+  try { const f = await BarcodeDetector.getSupportedFormats(); det = f.includes("qr_code") ? new BarcodeDetector({formats:["qr_code"]}) : false; } catch { det = false; }
+}
+function leerDe(fuente, w, h, recorte, maxLado){
+  // recorte: fracción central del cuadro (1 = completo)
+  const cw = w * recorte, ch = h * recorte, sx = (w - cw) / 2, sy = (h - ch) / 2;
+  const k = Math.min(1, (maxLado || 900) / Math.max(cw, ch));
+  lienzo.width = Math.round(cw * k); lienzo.height = Math.round(ch * k);
+  ctx2.drawImage(fuente, sx, sy, cw, ch, 0, 0, lienzo.width, lienzo.height);
+  return QRDEC.fromImageData(ctx2.getImageData(0, 0, lienzo.width, lienzo.height));
+}
+function procesarCodigo(c, destino){
+  const now = Date.now();
+  if (c === ultimo.c && now - ultimo.t < 4000) return;
+  ultimo = {c, t:now};
+  const id = codigoAId(c);
+  const res = id ? procesarId(id) : {tipo:"err", extra:"Ese código QR no es un gafete de la escuela."};
+  try { navigator.vibrate && navigator.vibrate(res.tipo==="ok"||res.tipo==="info"?120:[60,60,60]); } catch {}
+  if (res.tipo === "info") return;
+  if (destino && document.body.contains(destino)) destino.innerHTML = tarjeta(res.tipo, res.id, res.fecha, res.hora, res.extra, res.modo);
+}
+async function abrirCam(){
+  await prepararNativo();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { modoFoto(); return; }
+  try { stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}, width:{ideal:1280}, height:{ideal:720}}, audio:false}); }
+  catch { modoFoto(); return; }
+  try { const tr = stream.getVideoTracks()[0]; const cap = tr.getCapabilities ? tr.getCapabilities() : {};
+    if (cap.focusMode && cap.focusMode.includes("continuous")) await tr.applyConstraints({advanced:[{focusMode:"continuous"}]}); } catch {}
+  $("#modal").innerHTML = `<div class="cam"><video id="vid" playsinline muted autoplay></video><div class="frame"></div>
+    <div class="ctop"><b>${MODOS[modo()]}: acerca el gafete al recuadro</b><button class="cx" id="cx" type="button">Cerrar</button></div>
+    <div class="cbot"><div class="row" style="align-items:center"><span class="chip" id="cstat">Iniciando…</span><button class="btn sm" id="ccap" type="button" style="flex:0 0 auto;margin-left:auto">Capturar</button></div><div id="cres"><div class="msg">Escaneo continuo: registra un gafete tras otro sin cerrar la cámara. Si no lee, toca “Capturar” con el gafete quieto.</div></div></div></div>`;
+  const v = $("#vid"); v.srcObject = stream; await v.play().catch(()=>{});
+  $("#cx").addEventListener("click", cerrarCam);
+  let n = 0;
+  const estado = (txt, cls) => { const e = $("#cstat"); if (e) { e.textContent = txt; e.className = "chip " + (cls||""); } };
+  $("#ccap").addEventListener("click", () => {
+    if (!v.videoWidth) return; estado("Analizando captura…");
+    setTimeout(() => { let c = null;
+      try { for (const rc of [1, 0.7, 0.45]) { c = leerDe(v, v.videoWidth, v.videoHeight, rc, 1600); if (c) break; } } catch (e) { estado("Error: " + e.message, "warn"); return; }
+      if (c) { ultimo = {c:"", t:0}; procesarCodigo(c, $("#cres")); estado("Leído ✓", "ok"); }
+      else estado(QRDEC.STATS.marcas ? `Veo ${QRDEC.STATS.marcas} de 3 esquinas del QR: acércalo más` : "No veo el QR: acércalo y que tenga luz", "warn");
+    }, 30);
+  });
+  const tick = async () => {
+    if (!stream) return;
+    try {
+      if (v.readyState >= 2 && v.videoWidth) {
+        let c = null; n++;
+        if (det) { try { const r = await det.detect(v); if (r.length) c = r[0].rawValue; } catch { det = false; } }
+        if (!c) c = leerDe(v, v.videoWidth, v.videoHeight, (cuadro++ % 2) ? 0.6 : 1);
+        if (c) { procesarCodigo(c, $("#cres")); estado("Leído ✓", "ok"); }
+        else if (n % 3 === 0) { const m = QRDEC.STATS.marcas;
+          estado(m === 3 ? "QR a la vista: no lo muevas" : m ? `Veo ${m} de 3 esquinas del QR` : `Buscando QR… (${v.videoWidth}×${v.videoHeight})`, m === 3 ? "ok" : ""); }
+      } else estado("Esperando imagen de la cámara…");
+    } catch (e) { estado("Error: " + e.message, "warn"); }
+    loop = setTimeout(tick, 120);
+  };
+  tick();
+}
+function modoFoto(){
+  $("#res").innerHTML = `<div class="result ok"><div class="band">Modo foto</div><div class="body"><div class="msg">Se abrirá la cámara del celular. Apunta al QR, <b>toca el botón blanco para tomar la foto</b> y luego <b>✓ Aceptar</b>. La app lee el código de la foto.</div></div></div>`;
+  $("#foto").click();
+}
+function cerrarCam(){
+  clearTimeout(loop);
+  if (stream) stream.getTracks().forEach(t=>t.stop());
+  stream = null; $("#modal").innerHTML = "";
+}
+$("#foto").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  let code = null;
+  try {
+    const bmp = await createImageBitmap(f);
+    await prepararNativo();
+    if (det) { try { const r = await det.detect(bmp); code = r[0]?.rawValue || null; } catch {} }
+    for (const rc of [1, 0.6, 0.35]) { if (code) break; code = leerDe(bmp, bmp.width, bmp.height, rc); }
+  } catch {}
+  if (!code) { $("#res").innerHTML = tarjeta("err",null,"","","No se encontró el código en la foto. Tómala más cerca, con un solo gafete y buena luz."); $("#res .body").insertAdjacentHTML("beforeend", `<button class="btn block" type="button" id="sigFoto">Intentar otra vez</button>`); $("#sigFoto").addEventListener("click", () => $("#foto").click()); return; }
+  ultimo = {c:"", t:0}; procesarCodigo(code, $("#res"));
+  $("#res .body").insertAdjacentHTML("beforeend", `<button class="btn block" type="button" id="sigFoto">Escanear siguiente gafete</button>`);
+  $("#sigFoto").addEventListener("click", () => $("#foto").click());
+});
+
+/* ---------- Clicks ---------- */
+function renderCotejo(){
+  const box = $("#cotejoBox"); if (!box) return;
+  const c = S.cotejo; if (!S.url || !c) { box.innerHTML = ""; return; }
+  let h = "";
+  if (c.dias === null || c.dias >= (c.cada || 15)) h += `<div class="panel pad" style="border-left:4px solid var(--warn)"><b>📋 Toca cotejar con Control Escolar</b><span class="note">${c.fecha ? `Último cotejo: ${fCorta(c.fecha)} (hace ${c.dias} días).` : "Aún no se ha hecho ningún cotejo."} Sube los PDF o Excel de las listas oficiales a la carpeta <b>Listas Control Escolar</b> en Drive. Al día siguiente se cotejan solas.</span></div>`;
+  const fl = (c.faltantes || []).filter(f => S.alumnos[f.id]);
+  if (fl.length) { const sig = fl.filter(f => f.s).length;
+    h += `<details class="panel alert"><summary>⚠ ${fl.length} alumno(s) ya no aparecen en las listas de la SEP${sig ? ` · ${sig} siguen asistiendo` : ""}</summary>${fl.map(f => { const a = S.alumnos[f.id];
+      return `<div class="li"><div class="av s">${esc(ini(a.nombre))}</div><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)} · ${f.s ? "sigue asistiendo: posible desaparición del listado" : "sin asistir: posible baja"}</span></div></div>`; }).join("")}
+      <p class="note" style="padding:0 16px 14px">Cotejo del ${fCorta(c.fecha)}. Indica el motivo de cada uno (baja o desapareció del listado) en la hoja de Drive, pestaña <b>Cotejo SEP</b>.</p></details>`; }
+  box.innerHTML = h;
+}
+const saltados = new Set();
+function smsPendientes(conSaltados){ return [...Object.entries(hoyReg()), ...Object.entries(otrosHoy())].filter(([id,r]) => !r.sms && alu(id) && tel52(alu(id).tel) && (conSaltados || !saltados.has(id))).sort((a,b)=>a[1].h.localeCompare(b[1].h)).map(([id])=>id); }
+function renderSmsBox(){
+  const n = smsPendientes(true).length, box = $("#smsBox"); if (!box) return;
+  box.innerHTML = n ? `<div class="panel pad" style="flex-direction:row;align-items:center;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:160px"><b>${n} mensaje(s) por enviar</b><div class="note">Escanea a todos primero y manda los mensajes de WhatsApp al final, uno tras otro.</div></div><button class="btn pri" id="btnCola" type="button">Enviar mensajes</button></div>` : "";
+  const b = $("#btnCola"); if (b) b.addEventListener("click", abrirCola);
+}
+function abrirCola(){
+  const L = smsPendientes();
+  if (!L.length) { const q = smsPendientes(true).length; saltados.clear(); $("#modal").innerHTML = ""; $("#modal").dataset.cola = ""; toast(q ? `Quedan ${q} mensaje(s) sin enviar` : "Todos los mensajes de hoy están enviados"); return; }
+  const id = L[0], {fecha} = ahora(), r = regDe(fecha, id);
+  abrir(`<div class="sh"><h2>Mensajes por enviar</h2><span class="chip">${L.length} pendiente(s)</span></div>
+    ${tarjeta("ok", id, fecha, r.h).replace("✓ Asistencia registrada","Mensaje para el tutor")}
+    <div class="row"><button class="btn" id="colaYa" type="button">Ya lo envié</button><button class="btn" id="colaSkip" type="button">Saltar</button><button class="btn" id="colaFin" type="button">Terminar</button></div>
+    <p class="note">“Saltar” lo deja pendiente: si no se envía, la dirección recibe el aviso.</p>
+    <p class="note">Al tocar “Enviar por WhatsApp” se abre el chat del papá con el mensaje listo: toca Enviar (la flechita verde) y regresa aquí. Aparecerá el siguiente.</p>`);
+  $("#modal").dataset.cola = "1";
+  $("#colaYa").addEventListener("click", () => { marcarSms(id); abrirCola(); });
+  $("#colaSkip").addEventListener("click", () => { saltados.add(id); abrirCola(); });
+  $("#colaFin").addEventListener("click", () => { saltados.clear(); $("#modal").innerHTML = ""; $("#modal").dataset.cola = ""; });
+}
+function marcarSms(id){ const {fecha, hora} = ahora(), r = regDe(fecha, id);
+  if (r && !r.sms) { r.sms = true; encolar({tipo:"aviso", rid:`${fecha}_${id}_w`, fecha, hora, id}); guardar(); renderHoy(); renderSmsBox(); sincronizar(); } }
+document.addEventListener("click", e => { const a = e.target.closest("[data-sms]"); if (!a) return;
+  marcarSms(a.dataset.sms);
+  if ($("#modal").dataset.cola === "1") setTimeout(abrirCola, 900);
+});
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-mark],[data-show],[data-edit],[data-gaf]"); if (!t) return;
+  if (t.dataset.gaf) { gafete(t.dataset.gaf); return; }
+  if (t.dataset.mark) { const r = registrar(t.dataset.mark); $("#q").value=""; renderHoy(); $("#res").innerHTML = tarjeta(r.tipo,r.id,r.fecha,r.hora,r.extra); window.scrollTo({top:$("#res").offsetTop-70,behavior:"smooth"}); }
+  else if (t.dataset.show) { const {fecha}=ahora(); $("#res").innerHTML = tarjeta("ok", t.dataset.show, fecha, regDe(fecha, t.dataset.show).h); window.scrollTo({top:$("#res").offsetTop-70,behavior:"smooth"}); }
+  else if (t.dataset.edit) editar(t.dataset.edit);
+});
+$("#q").addEventListener("input", renderHoy);
+$("#qa").addEventListener("input", renderAlumnos);
+$("#btnNuevo").addEventListener("click", nuevoAlumno);
+$("#fG").addEventListener("change", renderAlumnos);
+
+function abrir(html){ $("#modal").innerHTML = `<div class="scrim"><div class="sheet">${html}</div></div>`; const s=$("#modal .scrim"); s.addEventListener("click", e=>{ if(e.target===s) { $("#modal").innerHTML=""; $("#modal").dataset.cola=""; } }); }
+const normG = g => { g = String(g||"").toUpperCase().replace(/\s|GRADO|GRUPO/g,"").replace(/[º°O]/g,"°"); const m = g.match(/^([123])°?([A-C])$/); return m ? `${m[1]}°${m[2]}` : ""; };
+function nuevoAlumno(){
+  const gs = ["1°A","1°B","1°C","2°A","2°B","2°C","3°A","3°B","3°C"];
+  abrir(`<div class="sh"><h2>Agregar alumno</h2></div>
+    <form id="fn" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f">Nombre completo<input class="input" id="nN" placeholder="Nombre(s) y apellidos" required autocomplete="off"></label>
+      <label class="f">Sexo<select class="input" id="nS" required><option value="">Elige</option><option value="H"${""==="H"?" selected":""}>Hombre</option><option value="M"${""==="M"?" selected":""}>Mujer</option></select></label>
+      <label class="f">Grupo<select class="input" id="nG" required><option value="">Elige el grupo</option>${gs.map(g=>`<option>${g}</option>`).join("")}</select></label>
+      <label class="f">Teléfono del tutor (10 dígitos)<input class="input" id="nT" inputmode="tel" placeholder="81 1234 5678"></label>
+      <label class="f">Nombre del tutor<input class="input" id="nU" autocomplete="off"></label>
+      <p class="note" id="nMsg">Al agregarlo se genera su gafete y, cuando haya señal, se sube a la Lista oficial de Drive en su grupo, con su gafete en la carpeta del grupo. Lleva la leyenda “Sin validación en listas oficiales”.</p>
+      <div class="row"><button class="btn pri" type="submit">Agregar</button><button class="btn" type="button" id="nX">Cancelar</button></div>
+    </form>`);
+  $("#nX").addEventListener("click", ()=>$("#modal").innerHTML="");
+  $("#fn").addEventListener("submit", ev => { ev.preventDefault();
+    const nombre = $("#nN").value.trim().replace(/\s+/g," "), grupo = $("#nG").value, tel = $("#nT").value.replace(/\D/g,"");
+    if (tel && tel.length !== 10) { $("#nMsg").innerHTML = `<b style="color:var(--bad)">El teléfono debe tener 10 dígitos.</b>`; return; }
+    const ya = Object.values(S.alumnos).find(a => a.nombre.toLowerCase() === nombre.toLowerCase());
+    if (ya && !$("#fn").dataset.ok) { $("#fn").dataset.ok = "1"; $("#nMsg").innerHTML = `<b style="color:var(--warn)">Ya existe un alumno con ese nombre en ${esc(ya.grupo)}.</b> Toca Agregar otra vez si de todos modos es otro alumno.`; return; }
+    const id = "M" + Date.now().toString(36).toUpperCase();
+    S.alumnos[id] = {nombre, grupo, tel, tutor:$("#nU").value.trim(), sexo:$("#nS").value, local:true, alta:ahora().fecha};
+    S.rosterSucio = true; guardar(); render(); toast(`${nombre} agregado a ${grupo}`); gafete(id); encolarGafete(id);
+  });
+}
+function editar(id){
+  const a = S.alumnos[id], ofi = a.enDrive && !a.local;   // v26: los datos de alumnos oficiales se corrigen en Drive para todos
+  abrir(`<div class="sh"><h2>${ofi ? "Corregir datos" : "Editar alumno"}</h2><span class="chip">ID ${esc(id)}</span></div>
+    <form id="fe" style="display:flex;flex-direction:column;gap:10px">
+      <label class="f">Nombre<input class="input" id="eN" value="${esc(a.nombre)}" required ${ofi?"readonly":""}></label>
+      <label class="f">Grupo<input class="input" id="eG" value="${esc(a.grupo)}" required ${ofi?"readonly":""}></label>
+      ${ofi ? `<p class="note">Nombre y grupo vienen de la lista oficial. El teléfono, el tutor y el sexo que corrijas aquí se guardan en Drive y llegan a todos los celulares.</p>` : ""}
+      <label class="f">Sexo<select class="input" id="eS" required><option value="">Elige</option><option value="H"${a.sexo==="H"?" selected":""}>Hombre</option><option value="M"${a.sexo==="M"?" selected":""}>Mujer</option></select></label>
+      <label class="f">Teléfono del tutor (10 dígitos)<input class="input" id="eT" value="${esc(a.tel)}" inputmode="tel"></label>
+      <label class="f">Nombre del tutor<input class="input" id="eU" value="${esc(a.tutor)}"></label>
+      <div class="row"><button class="btn pri" type="submit">Guardar</button><button class="btn" type="button" id="eX">Cancelar</button></div>
+    </form>`);
+  $("#eX").addEventListener("click", ()=>$("#modal").innerHTML="");
+  $("#fe").addEventListener("submit", ev => { ev.preventDefault();
+    const tel = $("#eT").value.replace(/\D/g,"");
+    if (tel && tel.length !== 10) { toast("El teléfono debe tener 10 dígitos"); $("#eT").focus(); return; }
+    const nv = {sexo:$("#eS").value, tel, tutor:$("#eU").value.trim()};
+    if (ofi) {
+      const cam = {}; Object.keys(nv).forEach(k => { if ((a[k]||"") !== nv[k]) cam[k] = nv[k]; });
+      if (!Object.keys(cam).length) { $("#modal").innerHTML = ""; return; }
+      const t = ahora(); encolar({tipo:"dato", rid:`dato_${id}_${Date.now()}`, fecha:t.fecha, hora:t.hora, id, nombre:a.nombre, grupo:a.grupo, ...cam});
+      S.alumnos[id] = {...a, ...cam, pend:{...(a.pend||{}), ...cam}};
+      guardar(); render(); $("#modal").innerHTML=""; toast(navigator.onLine ? "Guardado: se actualiza en Drive" : "Guardado: se envía a Drive cuando haya señal"); sincronizar(); return;
+    }
+    S.alumnos[id] = {...S.alumnos[id], nombre:$("#eN").value.trim(), grupo:normG($("#eG").value), ...nv};
+    S.rosterSucio = true; guardar(); render(); $("#modal").innerHTML=""; toast("Guardado"); sincronizar(); });
+}
+
+/* ---------- Sincronización con Drive ---------- */
+let enviando = false;
+let claveEstado = null; // null = sin revisar, "ok", "clave", "sin_clave"
+async function revisarClave(){
+  if (claveEstado === "ok") return true;
+  try { const ctrl = new AbortController(), to = setTimeout(()=>ctrl.abort(), 15000);
+    const r = await fetch(S.url + "?accion=ping" + qAuth() + "&t=" + Date.now(), {signal:ctrl.signal}); clearTimeout(to);
+    const j = await r.json(); if (j.error === "dispositivo") { desactivar(); return false; }
+    if (j.adm && j.adm !== S.adminHash) { S.adminHash = j.adm; guardar(); }
+    claveEstado = j.ok ? "ok" : (j.error || "clave"); }
+  catch { return false; }
+  renderPill(); return claveEstado === "ok";
+}
+async function sincronizar(manual){
+  renderPill();
+  const hay = S.cola.length || (S.gafCola && S.gafCola.length) || S.rosterSucio;
+  if (!S.tok) return;
+  if (enviando || !hay) { if (manual && !hay) toast("No hay nada pendiente"); return; }
+  if (!S.url) { if (manual) toast("Primero guarda el enlace de la hoja"); return; }
+  if (!navigator.onLine) { if (manual) toast("Sin señal: se enviará cuando regrese"); return; }
+  enviando = true;
+  if (!(await revisarClave())) { enviando = false; if (manual) toast(claveEstado === "sin_clave" ? "La hoja de Drive aún no tiene claves de acceso" : claveEstado ? "Este celular necesita activarse de nuevo" : "No se pudo conectar con Drive"); return; }
+  const lote = S.cola.slice(0, 100), gafs = (S.gafCola || []).slice(0, 5);
+  const inscritos = {}; grupos().forEach(g => inscritos[g] = Object.values(S.alumnos).filter(a=>a.grupo===g).length);
+  try {
+    const ctrl = new AbortController(); const to = setTimeout(()=>ctrl.abort(), 20000);
+    await fetch(S.url, {method:"POST", mode:"no-cors", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({clave:claveSesion, dev:S.dev, tok:S.tok||"", registros:lote, inscritos, gafetes:gafs, alumnos:Object.entries(S.alumnos).map(([id,a])=>({id, nombre:a.nombre, grupo:a.grupo, alta:a.alta||"", local:!!a.local, enDrive:!!a.enDrive, tel:a.tel||"", tutor:a.tutor||"", sexo:a.sexo||""}))}), signal:ctrl.signal});
+    clearTimeout(to);
+    const enviados = new Set(lote.map(r=>r.rid));
+    S.cola = S.cola.filter(r => !enviados.has(r.rid));
+    const gEnv = new Set(gafs.map(g=>g.id)); S.gafCola = (S.gafCola || []).filter(g => !gEnv.has(g.id)); S.rosterSucio = false;
+    S.ultimoSync = new Date().toISOString(); guardar();
+    if (manual) toast("Enviado a Drive");
+  } catch { if (manual) toast("No se pudo enviar: se reintentará solo"); }
+  enviando = false; renderPill(); renderSync();
+  if ((S.cola.length || (S.gafCola && S.gafCola.length)) && navigator.onLine) setTimeout(sincronizar, 1500);
+  else if (navigator.onLine) setTimeout(() => traerLista(true, true), 4000);
+}
+/* ---------- Lista oficial desde Drive ---------- */
+const nnom = s => String(s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase().replace(/[^A-Z ]/g," ").split(/\s+/).filter(Boolean).sort().join(" ");
+function aplicarListaDrive(lista){
+  const ofi = {}; lista.forEach(a => { if (a && a.id && a.nombre) ofi[a.id] = a; });
+  const nOfi = Object.keys(ofi).length, actuales = Object.entries(S.alumnos).filter(([,a]) => !a.local).length;
+  let altas = 0, cambios = 0, bajas = 0;
+  Object.values(ofi).forEach(a => {
+    // alumno agregado en el celular que ya está en la lista oficial: pasa su asistencia al ID oficial
+    Object.keys(S.alumnos).forEach(lid => { const l = S.alumnos[lid];
+      if (l.local && lid !== a.id && nnom(l.nombre) === nnom(a.nombre)) {
+        Object.values(S.asis).forEach(reg => { if (reg[lid] && !reg[a.id]) reg[a.id] = reg[lid]; delete reg[lid]; });
+        S.cola.forEach(r => { if (r.id === lid) { r.id = a.id; r.rid = r.fecha + "_" + a.id; } });
+        S.alias = S.alias || {}; S.alias[lid] = a.id; delete S.alumnos[lid]; } });
+    const s = S.alumnos[a.id], nuevo = {nombre:a.nombre, grupo:a.grupo, tel:a.tel || (s && s.tel) || "", tutor:a.tutor || (s && s.tutor) || "", sexo:a.sexo || (s && s.sexo) || "", enDrive:true};
+    if (a.sinValidar) { nuevo.local = true; nuevo.alta = (s && s.alta) || a.alta || ""; }
+    if (s && s.pend) {   // v26: corrección hecha en este celular que todavía no llega a Drive
+      const enCola = S.cola.some(r => r.tipo === "dato" && r.id === a.id), p = {};
+      Object.keys(s.pend).forEach(k => { if ((nuevo[k]||"") !== s.pend[k] && enCola) { p[k] = s.pend[k]; nuevo[k] = s.pend[k]; } });
+      if (Object.keys(p).length) nuevo.pend = p;
+    }
+    if (!s) { S.alumnos[a.id] = nuevo; altas++; }
+    else { const dif = s.nombre!==nuevo.nombre || s.grupo!==nuevo.grupo || (s.sexo||"")!==nuevo.sexo || s.tel!==nuevo.tel || s.tutor!==nuevo.tutor || !!s.local!==!!nuevo.local || JSON.stringify(s.pend||null)!==JSON.stringify(nuevo.pend||null); if (dif) cambios++; if (dif || !s.enDrive) S.alumnos[a.id] = nuevo; }
+  });
+  // bajas: solo si la lista de Drive se ve completa (evita borrar todo por un error en la hoja)
+  if (nOfi >= actuales * 0.7) Object.keys(S.alumnos).forEach(id => { const s = S.alumnos[id]; if ((!s.local || s.enDrive) && !ofi[id]) { delete S.alumnos[id]; bajas++; } });
+  return {altas, cambios, bajas};
+}
+let ultimaLista = 0, iniVisto = "";
+function purgarFueraDeAlcance(){ // quita del celular los alumnos de grupos que ya no le tocan (con su asistencia local)
+  if (!Array.isArray(S.alcance)) return 0;
+  const ok = new Set(S.alcance); let n = 0;
+  Object.keys(S.alumnos).forEach(id => { if (!ok.has(S.alumnos[id].grupo)) { delete S.alumnos[id]; n++; Object.values(S.asis).forEach(reg => { delete reg[id]; }); } });
+  return n;
+}
+function renderRol(){ $("#tabDir").style.display = S.rol === "direccion" ? "" : "none"; }
+async function traerLista(manual, silencioso){
+  if (!S.tok) return;
+  if (!S.url || !navigator.onLine) { if (manual) toast(S.url ? "Sin señal: inténtalo cuando haya internet" : "Primero guarda el enlace de la hoja"); return; }
+  if (!manual && Date.now() - ultimaLista < 10*60*1000) return;
+  ultimaLista = Date.now();
+  try {
+    const ctrl = new AbortController(), to = setTimeout(()=>ctrl.abort(), 20000);
+    const r = await fetch(S.url + "?accion=lista" + qAuth() + "&t=" + Date.now(), {signal:ctrl.signal}); clearTimeout(to);
+    const j = await r.json();
+    if (j.error === "dispositivo") { desactivar(); return; }
+    if (j.adm && j.adm !== S.adminHash) { S.adminHash = j.adm; guardar(); }
+    if (!j.ok && (j.error === "clave" || j.error === "sin_clave")) { claveEstado = j.error; renderPill(); if (manual) toast("La contraseña no coincide con la de la hoja de Drive"); return; }
+    if (j.ok && "directorio" in j) { if (j.directorio) { const d = {}; j.directorio.forEach(a => d[a.id] = a); S.dir = d; } else delete S.dir; }
+    if (j.ok && j.rol) { const antes = S.rol + "|" + JSON.stringify(S.alcance); S.rol = j.rol; S.alcance = j.alcance; if (antes !== S.rol + "|" + JSON.stringify(S.alcance)) { S.listaDriveVer = ""; guardar(); renderRol(); } }
+    if (j.ok && Array.isArray(j.alumnos) && !j.alumnos.length && j.hayLista) { const n = purgarFueraDeAlcance(); S.listaDriveVer = j.ver; guardar(); render(); if (manual || n) toast("Este celular no tiene grupos asignados"); return; }
+    if (!j.ok || !Array.isArray(j.alumnos) || !j.alumnos.length) { if (manual) toast("La hoja de Drive aún no tiene lista oficial"); return; }
+    if (j.cotejo) { S.cotejo = j.cotejo; guardar(); renderCotejo(); }
+    if ("inicio" in j && aplicarInicio(j.inicio) >= 0 && JSON.stringify(S.inicio||null) !== iniVisto) { iniVisto = JSON.stringify(S.inicio||null); render(); if (adminOk) renderInicio(); }
+    if (j.ver === S.listaDriveVer && !manual) return;
+    if (silencioso) manual = false;
+    if (j.cotejo) S.cotejo = j.cotejo;
+    const c = aplicarListaDrive(j.alumnos); c.bajas += purgarFueraDeAlcance(); S.listaDriveVer = j.ver; S.listaDriveFecha = new Date().toISOString(); guardar(); render(); renderSync();
+    if (c.altas || c.cambios || c.bajas) toast(`Lista de Drive: ${c.altas} alta(s), ${c.cambios} cambio(s), ${c.bajas} baja(s)`);
+    else if (manual) toast("La lista ya estaba al día");
+  } catch { if (manual) toast("No se pudo leer la lista de Drive. Revisa el enlace o la señal."); }
+}
+window.addEventListener("online", () => { sincronizar(); traerLista(); });
+window.addEventListener("offline", renderPill);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { render(); sincronizar(); traerLista(); } });
+setInterval(() => sincronizar(), 60000);
+
+function renderSync(){
+  $("#url").value = S.url || "";
+  $("#syncInfo").innerHTML = !S.url ? "Aún no está conectado a Drive. La asistencia se guarda en este celular y puedes exportarla desde Concentrado."
+    : `${S.cola.length ? `<b>${S.cola.length}</b> registro(s) esperando señal.` : "Todo está enviado."} ${S.ultimoSync ? `Último envío: ${new Date(S.ultimoSync).toLocaleString("es-MX",{dateStyle:"short",timeStyle:"short"})}.` : ""} ${S.listaDriveFecha ? `Lista de alumnos revisada: ${new Date(S.listaDriveFecha).toLocaleString("es-MX",{dateStyle:"short",timeStyle:"short"})}.` : ""}`;
+}
+$("#btnUrl").addEventListener("click", () => {
+  const u = $("#url").value.trim();
+  if (u && !/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)) { toast("El enlace debe empezar con https://script.google.com y terminar en /exec"); return; }
+  S.url = u; claveEstado = null;
+  if (u) { // al conectar por primera vez, manda todo el historial
+    const ya = new Set(S.cola.map(r=>r.rid));
+    Object.entries(S.asis).forEach(([f,regs]) => Object.entries(regs).forEach(([id,r]) => { const rid=`${f}_${id}`; if(!ya.has(rid)){ const a=S.alumnos[id]||{}; S.cola.push({rid,fecha:f,hora:r.h,id,nombre:a.nombre||id,grupo:a.grupo||""}); } }));
+  }
+  guardar(); renderSync(); toast(u ? "Enlace guardado" : "Enlace quitado"); sincronizar(true);
+});
+$("#btnSync").addEventListener("click", () => sincronizar(true));
+$("#btnLista").addEventListener("click", () => traerLista(true));
+
+
+/* ---------- Gafetes desde el celular ---------- */
+const DPI = 300, MM = DPI / 25.4, GW = Math.round(85.6 * MM), GH = Math.round(54 * MM);
+function rr(ctx, x, y, w, h, r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function lineas(ctx, txt, maxw){ const ws = txt.split(/\s+/), L = []; let cur = "";
+  ws.forEach(w => { const t = (cur ? cur + " " : "") + w; if (ctx.measureText(t).width <= maxw || !cur) cur = t; else { L.push(cur); cur = w; } }); if (cur) L.push(cur); return L; }
+function dibujarGafete(ctx, x0, y0, id, a){
+  const F = "system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif", r = 3 * MM;
+  ctx.save(); rr(ctx, x0, y0, GW, GH, r); ctx.fillStyle = "#fff"; ctx.fill(); ctx.clip();
+  ctx.fillStyle = "#0B1A2E"; ctx.fillRect(x0, y0, GW, 11 * MM); ctx.fillStyle = "#C69A4A"; ctx.fillRect(x0, y0 + 11 * MM, GW, 1 * MM);
+  ctx.fillStyle = "#E2C17F"; ctx.font = `700 ${Math.round(2.9*MM)}px ${F}`; ctx.textBaseline = "alphabetic"; ctx.fillText("ESC. SEC. NOCTURNA NO. 1", x0 + 4*MM, y0 + 5.3*MM);
+  ctx.fillStyle = "#fff"; ctx.font = `400 ${Math.round(2.4*MM)}px ${F}`; ctx.fillText("Salinas Victoria, N.L. · Credencial de asistencia", x0 + 4*MM, y0 + 9*MM);
+  // QR
+  const m = QRENC.matrix("SN1|" + id), q = 36 * MM, qx = x0 + 2.5*MM, qy = y0 + GH - 3*MM - q, cell = q / 25;
+  ctx.fillStyle = "#fff"; ctx.fillRect(qx, qy, q, q); ctx.fillStyle = "#000";
+  for (let i = 0; i < 21; i++) for (let j = 0; j < 21; j++) if (m[i][j]) ctx.fillRect(Math.floor(qx + (j+2)*cell), Math.floor(qy + (i+2)*cell), Math.ceil(cell), Math.ceil(cell));
+  // texto
+  const tx = x0 + 41*MM, mw = GW - 43.5*MM; let fs = 3.6*MM; ctx.fillStyle = "#0B1A2E";
+  ctx.font = `700 ${Math.round(fs)}px ${F}`; let L = lineas(ctx, a.nombre, mw);
+  if (L.length > 3) { fs = 3*MM; ctx.font = `700 ${Math.round(fs)}px ${F}`; L = lineas(ctx, a.nombre, mw); }
+  let yy = y0 + 17.5*MM; L.slice(0,4).forEach(l => { ctx.fillText(l, tx, yy); yy += fs * 1.18; });
+  ctx.fillStyle = "#C69A4A"; ctx.font = `800 ${Math.round(8.5*MM)}px ${F}`; ctx.fillText(a.grupo, tx, y0 + GH - (a.local ? 12.5 : 9)*MM);
+  ctx.fillStyle = "#5D6779"; ctx.font = `500 ${Math.round(2.5*MM)}px ui-monospace,Menlo,Consolas,monospace`; ctx.fillText("ID " + id, tx, y0 + GH - (a.local ? 8.6 : 4.5)*MM);
+  if (a.local) { const bx = tx - 1*MM, by = y0 + GH - 7*MM, bw = GW - (tx - x0) - 2*MM, bh = 4.6*MM;
+    ctx.fillStyle = "#FBF0DD"; rr(ctx, bx, by, bw, bh, 1.2*MM); ctx.fill(); ctx.fillStyle = "#A8670F";
+    ctx.font = `700 ${Math.round(2.05*MM)}px ${F}`; const t2 = lineas(ctx, "Sin validación en listas oficiales", bw - 2*MM);
+    if (t2.length === 1) ctx.fillText(t2[0], bx + 1*MM, by + 3.1*MM); else { ctx.font = `700 ${Math.round(1.7*MM)}px ${F}`; ctx.fillText("Sin validación en listas oficiales", bx + 1*MM, by + 3*MM); } }
+  ctx.restore();
+  ctx.save(); ctx.setLineDash([2*MM/3, 2*MM/3]); ctx.strokeStyle = "#9AA3B2"; ctx.lineWidth = 0.3*MM; rr(ctx, x0, y0, GW, GH, r); ctx.stroke(); ctx.restore();
+}
+function hojaGafete(id, a){ // hoja carta a 300 dpi con el gafete a tamaño real
+  const c = document.createElement("canvas"); c.width = Math.round(8.5*DPI); c.height = 11*DPI;
+  const ctx = c.getContext("2d"); ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+  ctx.fillStyle = "#5D6779"; ctx.font = `400 ${Math.round(3*MM)}px system-ui,Arial,sans-serif`;
+  ctx.fillText("Gafete · Esc. Sec. Nocturna No. 1 · Recortar por la línea punteada · Imprimir a tamaño real (100 %)", 12*MM, 10*MM);
+  dibujarGafete(ctx, 12*MM, 14*MM, id, a); return c;
+}
+function encolarGafete(id){
+  const a = S.alumnos[id]; if (!a) return;
+  try { const c = document.createElement("canvas"); c.width = GW; c.height = GH; dibujarGafete(c.getContext("2d"), 0, 0, id, a);
+    const png = c.toDataURL("image/png").split(",")[1];
+    S.gafCola = (S.gafCola || []).filter(g => g.id !== id); S.gafCola.push({id, nombre:a.nombre, grupo:a.grupo, png});
+    if (!guardar()) { S.gafCola.pop(); guardar(); } else sincronizar();
+  } catch {}
+}
+function gafete(id){
+  const a = S.alumnos[id]; if (!a) return;
+  let prev; try { prev = document.createElement("canvas"); prev.width = GW; prev.height = GH; dibujarGafete(prev.getContext("2d"), 0, 0, id, a); }
+  catch (e) { toast("No se pudo generar el gafete: " + e.message); return; }
+  abrir(`<div class="sh"><h2>Gafete</h2><span class="chip">ID ${esc(id)}</span></div>
+    <img src="${prev.toDataURL("image/png")}" alt="Gafete de ${esc(a.nombre)}" style="width:100%;border-radius:12px;box-shadow:var(--shadow)">
+    ${a.local ? `<div class="msg">Este alumno se agregó en el celular: el gafete lleva la leyenda <b>“Sin validación en listas oficiales”</b>.</div>` : ""}
+    <button class="btn pri block" id="gShare" type="button">Compartir para imprimir</button>
+    <p class="note">Se genera una hoja carta con el gafete a tamaño credencial (8.6 × 5.4 cm). Envíala por WhatsApp o guárdala, y pide que la impriman al 100 %, sin ajustar a la página.</p>
+    <button class="btn block" id="gX" type="button">Cerrar</button>`);
+  $("#gX").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#gShare").addEventListener("click", () => {
+    const nombre = `Gafete ${a.nombre} ${a.grupo.replace("°","")}.png`;
+    hojaGafete(id, a).toBlob(b => { if (b) entregar(nombre, b, "image/png"); else toast("No se pudo crear la imagen"); }, "image/png");
+    encolarGafete(id);
+  });
+}
+
+/* ---------- Exportar / respaldo ---------- */
+async function entregar(nombre, contenido, tipo){
+  const blob = contenido instanceof Blob ? contenido : new Blob([contenido], {type:tipo});
+  if (window.SN1Nativo && SN1Nativo.guardar) { // app instalada (Android)
+    const fr = new FileReader(); fr.onload = () => { try { SN1Nativo.guardar(nombre, tipo, String(fr.result).split(",")[1]); } catch { toast("No se pudo guardar el archivo"); } }; fr.readAsDataURL(blob); return; }
+  try {
+    const file = new File([blob], nombre, {type:tipo});
+    if (navigator.canShare && navigator.canShare({files:[file]})) { await navigator.share({files:[file], title:nombre}); return; }
+  } catch (e) { if (e && e.name==="AbortError") return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nombre; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000); toast("Archivo guardado en Descargas");
+}
+function csv(){
+  const {gs, grados, ins, total, filas} = datosConc();
+  const q = v => `"${String(v).replace(/"/g,'""')}"`, sum=(o,gr)=>gs.filter(g=>g[0]===gr).reduce((s,g)=>s+(o[g]||0),0);
+  const col = o => grados.flatMap(gr => [...gs.filter(g=>g[0]===gr).map(g=>o[g]), sum(o,gr)]);
+  const L = [[`Concentrado de asistencia · ${ESCUELA}`],[],["Fecha",...grados.flatMap(gr=>[...gs.filter(g=>g[0]===gr),`${gr}° total`]),"Total presentes","% asistencia"],["Inscritos",...col(ins),total,""]];
+  { const ps = sx => { const o = {}; gs.forEach(g => o[g] = Object.values(S.alumnos).filter(a => a.grupo===g && a.sexo===sx).length); return o; };
+    const oH = ps("H"), oM = ps("M"); L.push(["Hombres",...col(oH),Object.values(oH).reduce((s,x)=>s+x,0),""], ["Mujeres",...col(oM),Object.values(oM).reduce((s,x)=>s+x,0),""]); }
+  [...filas].reverse().forEach(r => L.push([fCorta(r.f),...col(r.c),r.tot,Math.round(r.pct*100)+"%"]));
+  { const dias = diasClase(), meses = [...new Set(dias.map(f=>f.slice(0,7)))].sort();
+    L.push([],["Faltas por alumno"],["Matrícula","Alumno","Grupo",...meses.map(m=>MESES[+m.slice(5)-1]+" "+m.slice(0,4)),"Total faltas","Días de clase"]);
+    Object.entries(S.alumnos).sort((a,b)=>ordG(a[1].grupo,b[1].grupo)||a[1].nombre.localeCompare(b[1].nombre)).forEach(([id,a]) => {
+      const ds = dias.filter(f=>cuenta(a,f)), fx = ds.filter(f=>!S.asis[f][id]);
+      L.push([id,a.nombre,a.grupo,...meses.map(m=>fx.filter(f=>f.startsWith(m)).length),fx.length,ds.length]); }); }
+  L.push([],["Detalle por alumno"],["Fecha","Hora","Matrícula","Alumno","Grupo"]);
+  Object.keys(S.asis).sort().forEach(f => Object.entries(S.asis[f]).sort((a,b)=>a[1].h.localeCompare(b[1].h)).forEach(([id,r]) => { const a=S.alumnos[id]||{}; L.push([fCorta(f),r.h,id,a.nombre||id,a.grupo||""]); }));
+  return "﻿" + L.map(r=>r.map(q).join(",")).join("\r\n");
+}
+$("#btnExport").addEventListener("click", () => entregar(`Concentrado asistencia ${ahora().fecha}.csv`, csv(), "text/csv"));
+$("#btnBak").addEventListener("click", () => entregar(`Respaldo asistencia ${ahora().fecha}.json`, JSON.stringify({...S, tok:undefined, adminHash:undefined}), "application/json"));
+$("#btnRes").addEventListener("click", () => $("#fileRes").click());
+$("#btnReset").addEventListener("click", e => {
+  const b = e.currentTarget;
+  if (!b.dataset.ok) { b.dataset.ok = "1"; b.textContent = "Toca otra vez para confirmar"; setTimeout(() => { b.dataset.ok = ""; b.textContent = "Borrar asistencias"; }, 5000); return; }
+  S.asis = {}; S.cola = []; S.just = {}; guardar(); render(); renderSync(); $("#res").innerHTML = "";
+  b.dataset.ok = ""; b.textContent = "Borrar asistencias"; toast("Asistencias borradas: listo para empezar");
+});
+$("#fileRes").addEventListener("change", async e => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  try { const d = JSON.parse(await f.text()); if (!d.alumnos || !d.asis) throw 0; const act = {dev:S.dev, tok:S.tok, url:S.url, adminHash:S.adminHash, devNom:S.devNom, activado:S.activado, rol:S.rol, alcance:S.alcance, tablero:S.tablero, inicio:S.inicio}; S = {...d, ...act, listaDriveVer:""}; purgarFueraDeAlcance(); delete S.clave; S.cola = S.cola||[]; guardar(); render(); renderSync(); toast("Respaldo restaurado"); }
+  catch { toast("Ese archivo no es un respaldo válido"); }
+});
+
+/* ---------- Sección de dirección (contraseña) ---------- */
+let adminOk = false, admIntentos = 0, admEspera = 0, claveSesion = "";
+function renderAdmin(){
+  $("#adminBody").hidden = !adminOk; $("#adminLock").hidden = adminOk;
+  if (adminOk) return;
+  const nueva = !S.adminHash;
+  $("#admTxt").textContent = nueva ? "Este celular todavía no recibe la clave de administración. Ábrelo con señal para que se actualice." : "Esta sección es solo para la administración. Escribe la clave de administración.";
+  $("#admP2").hidden = true; $("#admP1").hidden = nueva; $("#admOk").hidden = nueva; $("#admOk").textContent = "Entrar"; $("#admMsg").textContent = ""; $("#admP1").value = ""; $("#admP2").value = "";
+}
+$("#admOk").addEventListener("click", async () => {
+  const p1 = $("#admP1").value, msg = $("#admMsg");
+  if (Date.now() < admEspera) { msg.textContent = "Espera un minuto e intenta de nuevo."; return; }
+  if (!S.adminHash) return;
+  if (await hashPin("adm|" + normClave(p1)) === S.adminHash) { admIntentos = 0; claveSesion = p1; adminOk = true; renderAdmin(); renderSync(); renderAjustes2(); renderInicio(); traerLista(true, true); }
+  else { admIntentos++; $("#admP1").value = ""; if (admIntentos >= 5) { admIntentos = 0; admEspera = Date.now() + 60000; msg.textContent = "Demasiados intentos. Espera un minuto."; } else msg.textContent = "Contraseña incorrecta."; }
+});
+$("#admP1").addEventListener("keydown", e => { if (e.key === "Enter" && $("#admP2").hidden) $("#admOk").click(); });
+$("#admSalir").addEventListener("click", () => { adminOk = false; claveSesion = ""; renderAdmin(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && adminOk) { adminOk = false; claveSesion = ""; renderAdmin(); } });
+
+$("#btnAviso").addEventListener("click", nuevoAviso);
+$("#btnJunta").addEventListener("click", nuevaJunta);
+$("#btnCuota") && $("#btnCuota").addEventListener("click", nuevaCuota);
+$("#pCSel") && $("#pCSel").addEventListener("change", e => { cuotas().activa = e.target.value; guardar(); renderPadres(); renderModos(); });
+$("#btnCobrarQR") && $("#btnCobrarQR").addEventListener("click", () => { if (!conceptoActivo()) { toast("Primero agrega una cuota"); return; } S.modo = "cuota"; guardar(); renderModos(); abrirCam(); });
+$("#btnCobrar") && $("#btnCobrar").addEventListener("click", () => { if (!conceptoActivo()) { toast("Primero agrega una cuota"); return; }
+  abrir(`<div class="sh"><h2>Buscar alumno para cobrar</h2></div><input class="input" id="cobQ" placeholder="Nombre del alumno" autocomplete="off"><div class="panel" id="cobL"></div><button class="btn block" id="cobX" type="button">Cerrar</button>`);
+  const ca = conceptoActivo(), pinta = () => { const q = $("#cobQ").value.trim().toLowerCase();
+    $("#cobL").innerHTML = Object.entries(S.alumnos).filter(([,a]) => !q || a.nombre.toLowerCase().includes(q)).sort((x,y)=>ordG(x[1].grupo,y[1].grupo)||x[1].nombre.localeCompare(y[1].nombre)).slice(0,40)
+      .map(([id,a]) => { const p = pagado(id, ca.id); return `<div class="li"><div class="t"><b>${esc(a.nombre)}</b><span>${esc(a.grupo)}</span></div><span class="chip ${p>=ca.monto?"ok":p?"warn":""}">${p>=ca.monto?"Pagado":p?"$"+p:"Pendiente"}</span><button class="btn sm" data-cobrar="${esc(id)}" type="button">Cobrar</button></div>`; }).join(""); };
+  $("#cobQ").addEventListener("input", pinta); $("#cobX").addEventListener("click", () => $("#modal").innerHTML = ""); pinta(); setTimeout(() => { const q = $("#cobQ"); if (q) q.focus(); }, 50); });
+document.addEventListener("click", e => { const b = e.target.closest("[data-cobrar]"); if (b) cobrar(b.dataset.cobrar); });
+$("#btnCfg").addEventListener("click", () => { const e = $("#cfE").value, s = $("#cfS").value, tl = Number($("#cfT").value);
+  if (!e || !s || !(tl >= 0)) { toast("Revisa las horas"); return; } S.cfg = {entrada:e, tol:tl, salida:s}; guardar(); renderModos(); toast("Horario guardado"); });
+$("#btnPin").addEventListener("click", async () => { const p = $("#pinNuevo").value.trim(); if (!/^\d{4,6}$/.test(p)) { toast("El PIN debe tener de 4 a 6 números"); return; }
+  S.pin = await hashPin(p); guardar(); $("#pinNuevo").value = ""; renderAjustes2(); toast("PIN guardado"); });
+$("#btnPinQuitar").addEventListener("click", () => { delete S.pin; guardar(); renderAjustes2(); toast("PIN quitado"); });
+/* ---------- v25: inicio del control (solo administración) ---------- */
+function gruposEscuela(){ const g = new Set(grupos()); Object.keys(S.inicio || {}).forEach(x => g.add(x)); return [...g].filter(x => /^[123]°[A-C]$/.test(x)).sort(ordG); }
+function renderInicio(){
+  const f = $("#iniF"); if (!f.value) f.value = ahora().fecha;
+  $("#iniLista").innerHTML = gruposEscuela().map(g => { const i = S.inicio ? (S.inicio[g] || "") : null;
+    const est = i === null ? `<span class="chip">Cuenta todo</span>` : i ? `<span class="chip ok" title="${fCorta(i)}">Desde ${fCorta(i).slice(0,5)}</span>` : `<span class="chip warn">Sin iniciar</span>`;
+    return `<div class="li"><div class="t" style="flex:1 1 auto;min-width:40px"><b>${esc(g)}</b></div>${est}<button class="btn sm" data-ini="${esc(g)}" type="button">${i ? "Reiniciar" : "Iniciar"}</button>${i ? `<button class="btn sm" data-ini-quitar="${esc(g)}" type="button" title="Dejar sin iniciar">✕</button>` : ""}</div>`; }).join("")
+    || `<div class="empty">Actualiza la lista de alumnos desde Drive para ver los grupos.</div>`;
+}
+function confirmarInicio(grupos, fecha){
+  const txt = !fecha ? `<b>${esc(grupos)}</b> quedará <b>sin iniciar</b>: no contará faltas hasta que le pongas fecha.`
+    : `<b>${esc(grupos === "todos" ? "Todos los grupos" : grupos)}</b> empezará${grupos === "todos" ? "n" : ""} a contar desde el <b>${fLarga(fecha)}</b>. Lo registrado antes de esa fecha pasa al respaldo de Drive y se quita de los celulares.`;
+  abrir(`<div class="sh"><h2>Inicio del control</h2></div><p>${txt}</p><div class="row"><button class="btn" id="iniNo" type="button">Cancelar</button><button class="btn pri" id="iniSi" type="button">Confirmar</button></div>`);
+  $("#iniNo").addEventListener("click", () => $("#modal").innerHTML = "");
+  $("#iniSi").addEventListener("click", () => { $("#modal").innerHTML = ""; enviarInicio(grupos, fecha); });
+}
+async function enviarInicio(grupos, fecha){
+  const msg = $("#iniMsg");
+  if (!adminOk) { toast("Abre la sección de administración"); return; }
+  if (!S.url || !navigator.onLine) { toast("Se necesita señal para cambiar el inicio del control"); return; }
+  msg.textContent = "Guardando en Drive…";
+  try {
+    const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 60000);
+    const r = await fetch(S.url + "?accion=inicio" + qAuth() + "&grupos=" + encodeURIComponent(grupos) + "&fecha=" + encodeURIComponent(fecha) + "&quien=" + encodeURIComponent(S.devNom || "") + "&t=" + Date.now(), {signal:ctrl.signal}); clearTimeout(to);
+    const j = await r.json();
+    if (j.error === "dispositivo") { desactivar(); return; }
+    if (!j.ok) { msg.textContent = j.error === "rol" ? "Solo la clave de administración puede cambiar el inicio del control." : "No se pudo guardar. Inténtalo de nuevo."; return; }
+    const n = aplicarInicio(j.inicio); iniVisto = JSON.stringify(S.inicio||null); render(); renderInicio();
+    msg.textContent = (fecha ? `Listo: ${grupos === "todos" ? "todos los grupos cuentan" : grupos + " cuenta"} desde el ${fCorta(fecha)}.` : `Listo: ${grupos} quedó sin iniciar.`) + (j.archivados ? ` ${j.archivados} registro(s) pasaron al respaldo en Drive.` : "") + (n ? ` Se quitaron ${n} registro(s) anteriores de este celular.` : "") + " Los demás celulares se actualizan al tener señal.";
+  } catch { msg.textContent = "No se pudo conectar con Drive. Revisa la señal."; }
+}
+$("#iniTodos").addEventListener("click", () => { const f = $("#iniF").value; if (!f) { toast("Elige la fecha de inicio"); return; } confirmarInicio("todos", f); });
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-ini]"), q = e.target.closest("[data-ini-quitar]");
+  if (b) { const f = $("#iniF").value; if (!f) { toast("Elige la fecha de inicio"); return; } confirmarInicio(b.dataset.ini, f); }
+  if (q) confirmarInicio(q.dataset.iniQuitar, "");
+});
+
+/* ---------- v21: tablero de dirección (datos de Drive) ---------- */
+let cargandoT = false;
+async function cargarTablero(manual){
+  if (S.rol !== "direccion" || !S.url || cargandoT) return;
+  if (!navigator.onLine) { if (manual) toast("Sin señal: se muestran los últimos datos descargados"); return; }
+  cargandoT = true; $("#dirAct").textContent = "Actualizando…";
+  try {
+    const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 45000);
+    const r = await fetch(S.url + "?accion=tablero" + qAuth() + "&t=" + Date.now(), {signal:ctrl.signal}); clearTimeout(to);
+    const j = await r.json();
+    if (j.error === "dispositivo") { desactivar(); return; }
+    if (j.error === "rol") { S.rol = "docente"; S.tablero = null; guardar(); renderRol(); document.querySelector('.tab[data-v="hoy"]').click(); toast("Este celular ya no es de Dirección"); return; }
+    if (j.ok) { S.tablero = j; guardar(); renderTablero(); if (manual) toast("Datos de Drive actualizados"); }
+  } catch { if (manual) toast("No se pudo leer Drive. Inténtalo con mejor señal."); }
+  finally { cargandoT = false; $("#dirAct").textContent = "Actualizar"; }
+}
+$("#dirAct").addEventListener("click", () => cargarTablero(true));
+function renderTablero(){
+  const T = S.tablero, b = $("#dirBody");
+  if (!T) { b.innerHTML = `<div class="empty">Toca “Actualizar” para descargar los datos de toda la escuela.</div>`; $("#dirInfo").textContent = "Datos acumulados en Drive de todos los celulares."; return; }
+  $("#dirInfo").textContent = `Actualizado: ${T.generado} · ${T.celulares} celular(es) activo(s) · ${T.dias} día(s) de clase registrados.`;
+  const sum = o => Object.values(o||{}).reduce((s,x)=>s+(+x||0),0), pc = x => x === "" || x == null ? "—" : Math.round(x*100) + "%";
+  const U = T.ultimo;
+  let h = `<div class="kpis"><div class="kpi"><div class="k">Inscritos</div><div class="v">${T.total}</div></div><div class="kpi"><div class="k">Hombres</div><div class="v">${sum(T.H)}</div></div><div class="kpi"><div class="k">Mujeres</div><div class="v">${sum(T.M)}</div></div></div>`;
+  h += `<div class="kpis"><div class="kpi"><div class="k">Último día</div><div class="v" style="font-size:18px">${U ? esc(U.fecha.slice(0,5)) : "—"}</div></div><div class="kpi"><div class="k">Presentes</div><div class="v">${U ? U.total : 0}</div></div><div class="kpi"><div class="k">Asistencia</div><div class="v">${U ? pc(U.pct) : "—"}</div></div></div>`;
+  h += `<div class="panel pad"><div class="sh"><h2>Asistencia por día</h2><p>toda la escuela</p></div>${barrasV((T.grafDia||[]).map(d => ({l:d[0], v:Math.round(d[1]*100)})))}</div>`;
+  h += `<div class="panel pad"><div class="sh"><h2>Faltas por grupo</h2><p>este mes</p></div>${barrasH((T.grafGrupo||[]).map(r => ({l:r[0], v:r[1], s:`${r[1]} · ${Math.round(r[2]*100)}%`, c:r[2]>=0.3?"var(--bad)":r[2]>=0.15?"var(--warn)":"var(--ok)"})))}<p class="note">Número de faltas y % de faltas sobre los días posibles del mes.</p></div>`;
+  h += `<div class="panel pad"><div class="sh"><h2>Por grupo</h2><p>${U ? "presentes el " + esc(U.fecha.slice(0,5)) : ""}</p></div><div class="tbox" style="border:0"><table><thead><tr><th>Grupo</th><th>Inscritos</th><th>H</th><th>M</th><th>Presentes</th>${T.inicio ? "<th>Inicio</th>" : ""}</tr></thead><tbody>${T.grupos.map(g => `<tr><td><b>${esc(g)}</b></td><td>${T.ins[g]}</td><td>${T.H[g]}</td><td>${T.M[g]}</td><td>${U ? (U.pres[g]||0) : "—"}</td>${T.inicio ? `<td>${T.inicio[g] ? fCorta(T.inicio[g]).slice(0,5) : "Sin iniciar"}</td>` : ""}</tr>`).join("")}</tbody></table></div></div>`;
+  const tabla = (filas, etq) => filas && filas.length ? `<div class="tbox" style="border:0;border-radius:0"><table><thead><tr><th>${etq}</th>${T.grupos.map(g=>`<th>${esc(g)}</th>`).join("")}<th>Total</th><th>Asist.</th></tr></thead><tbody>${filas.map(r => `<tr><td>${esc(r[0])}<br><span class="note">${r[1]} día(s)</span></td>${r.slice(2, -2).map(n=>`<td>${n}</td>`).join("")}<td><b>${r[r.length-2]}</b></td><td>${pc(r[r.length-1])}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">Sin datos todavía.</div>`;
+  h += `<details class="panel" open><summary>Faltas por semana y grupo</summary>${tabla(T.semanas, "Semana")}</details>`;
+  h += `<details class="panel"><summary>Faltas por mes y grupo</summary>${tabla(T.meses, "Mes")}</details>`;
+  h += `<details class="panel ${T.riesgo.length ? "alert" : ""}"><summary>Semáforo de riesgo: ${T.riesgo.filter(r=>/Alto/.test(r[0])).length} alto · ${T.riesgo.filter(r=>/Medio/.test(r[0])).length} medio</summary>${T.riesgo.length ? T.riesgo.map(r => `<div class="li"><div class="av s">${/Alto/.test(r[0]) ? "🔴" : "🟡"}</div><div class="t"><b>${esc(r[1])}</b><span>${esc(r[2])} · ${/Alto/.test(r[0]) ? "Riesgo alto" : "Riesgo medio"} · ${esc(r[3])}</span></div></div>`).join("") : `<div class="empty">Sin alumnos en riesgo.</div>`}</details>`;
+  h += `<details class="panel"><summary>3 o más faltas seguidas: ${T.alertas.length}</summary>${T.alertas.length ? T.alertas.map(r => `<div class="li"><div class="t"><b>${esc(r[0])}</b><span>${esc(r[1])} · ${r[2]} faltas seguidas · última asistencia: ${esc(r[3])}</span></div></div>`).join("") : `<div class="empty">Ningún alumno con 3 o más faltas seguidas.</div>`}</details>`;
+  const av = T.avisos || {};
+  [["hoy","Hoy"],["anterior","Día anterior"]].forEach(([k,et]) => { const A = av[k]; if (!A) return;
+    h += `<details class="panel ${A.total ? "alert" : ""}" ${A.total && k==="anterior" ? "open" : ""}><summary>${et} (${fCorta(A.fecha)}): ${A.total ? A.total + " familia(s) sin aviso" : "todas las familias avisadas ✓"}</summary>${A.total ? `<div class="pad" style="padding:0 16px">${Object.entries(A.porCel).map(([c,n]) => `<span class="chip warn" style="margin:0 6px 6px 0;display:inline-block">${esc(c)}: ${n}</span>`).join("")}</div>${A.lista.map(x => `<div class="li"><div class="t"><b>${esc(x.nombre)}</b><span>${esc(x.grupo)} · escaneado ${esc(x.hora)} · ${esc(x.cel)}</span></div></div>`).join("")}` : ""}</details>`; });
+  const c = T.cotejo || {}, fl = c.faltantes || [];
+  h += `<div class="panel pad"><b>Cotejo con Control Escolar</b><p class="note">${c.fecha ? `Último cotejo: ${fCorta(c.fecha)} (hace ${c.dias} días). ${fl.length} alumno(s) no aparecen en las listas de la SEP, ${fl.filter(f=>f.s).length} siguen asistiendo.` : "Aún no se ha hecho ningún cotejo."} Detalle en la hoja de Drive, pestaña Cotejo SEP.</p></div>`;
+  b.innerHTML = h;
+}
+
+/* ---------- v20: activación del celular ---------- */
+function qAuth(){ return "&k=" + encodeURIComponent(claveSesion) + "&dev=" + encodeURIComponent(S.dev) + "&tok=" + encodeURIComponent(S.tok || ""); }
+function pantallaActivacion(aviso){
+  if ($("#act")) return;
+  const d = document.createElement("div"); d.id = "act"; d.className = "lock";
+  d.innerHTML = `<div class="lockbox" style="max-width:360px;text-align:left">
+    <div class="crest" style="margin:0 auto">SN1</div>
+    <h2 style="color:#F4F1EA;text-align:center;margin:0">Activar este celular</h2>
+    <p class="note" style="color:#C9D2E0;text-align:center">App de uso exclusivo de la Esc. Sec. Nocturna No. 1. Escribe la clave de acceso que te dio la dirección.</p>
+    ${aviso ? `<div class="msg" style="background:#3A1F1F;color:#FFD9D2;border-color:#7A3A30">${esc(aviso)}</div>` : ""}
+    <label class="f" style="color:#E2C17F" ${(S.url||URL_ESCUELA) ? "hidden" : ""}>Enlace de la hoja de Drive<input class="input" id="acUrl" value="${esc(S.url||URL_ESCUELA)}" placeholder="https://script.google.com/macros/s/…/exec" inputmode="url" autocomplete="off"></label>
+    <label class="f" style="color:#E2C17F">Nombre de este celular<input class="input" id="acNom" value="${esc(S.devNom||"")}" placeholder="Ej. Prof. López" maxlength="40" autocomplete="off"></label>
+    <label class="f" style="color:#E2C17F">Clave de acceso<input class="input" id="acCod" placeholder="Ej. 0058V1A" maxlength="30" autocapitalize="characters" autocomplete="off" style="letter-spacing:2px;text-transform:uppercase;font-weight:700"></label>
+    <p class="note" id="acMsg" style="color:#FFB4A6;text-align:center"></p>
+    <button class="btn pri block" id="acOk" type="button" style="background:#D7AE62;color:#0B1A2E;border-color:#D7AE62">Activar</button>
+    ${(S.url||URL_ESCUELA) ? `<button class="btn sm" id="acCambiaUrl" type="button" style="align-self:center">Cambiar enlace de Drive</button>` : ""}
+    <button class="btn sm" id="acAcerca" type="button" style="align-self:center">Acerca de</button>
+  </div>`;
+  document.body.appendChild(d);
+  const cu = $("#acCambiaUrl"); if (cu) cu.addEventListener("click", () => { $("#acUrl").closest("label").hidden = false; cu.remove(); });
+  $("#acAcerca").addEventListener("click", acercaDe);
+  $("#acOk").addEventListener("click", async () => {
+    const url = $("#acUrl").value.trim(), nom = $("#acNom").value.trim(), cod = normClave($("#acCod").value), m = $("#acMsg"), b = $("#acOk");
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { m.textContent = "El enlace debe empezar con https://script.google.com y terminar en /exec"; return; }
+    if (!nom) { m.textContent = "Escribe un nombre para reconocer este celular."; return; }
+    if (cod.length < 6) { m.textContent = "Escribe la clave de acceso que te dio la dirección."; return; }
+    if (!navigator.onLine) { m.textContent = "Para activar se necesita internet una sola vez."; return; }
+    b.disabled = true; b.textContent = "Activando…"; m.textContent = "";
+    try {
+      const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 25000);
+      const r = await fetch(url + "?accion=activar&cod=" + encodeURIComponent(cod) + "&dev=" + encodeURIComponent(S.dev) + "&nom=" + encodeURIComponent(nom) + "&t=" + Date.now(), {signal:ctrl.signal}); clearTimeout(to);
+      const j = await r.json();
+      if (!j.ok) { m.textContent = j.error === "codigo" ? "Clave incorrecta o dada de baja. Revísala con la dirección." : j.error === "sin_clave" ? "La hoja de Drive aún no tiene claves de acceso." : "No se pudo activar."; b.disabled = false; b.textContent = "Activar"; return; }
+      if (S.url !== url) { S.listaDriveVer = ""; }
+      S.url = url; S.tok = j.tok; S.adminHash = j.adm || S.adminHash; S.devNom = nom; S.activado = new Date().toISOString(); delete S.desactivado;
+      claveEstado = null; guardar(); d.remove(); render(); renderSync(); renderAjustes2();
+      toast("Celular activado. Descargando la lista de alumnos…"); traerLista(true);
+    } catch { m.textContent = "No se pudo conectar con Drive. Revisa el enlace o la señal."; b.disabled = false; b.textContent = "Activar"; }
+  });
+}
+function desactivar(){
+  const keep = {dev:S.dev, url:S.url, devNom:S.devNom};
+  S = {alumnos:{}, asis:{}, cola:[], ultimoSync:null, ...keep, desactivado:true}; guardar(); renderRol();
+  adminOk = false; claveSesion = ""; claveEstado = null; $("#modal").innerHTML = ""; const l = $("#lock"); if (l) l.remove();
+  render(); renderSync(); renderAdmin();
+  pantallaActivacion("La dirección desactivó este celular. Se borraron los datos guardados en él.");
+}
+function acercaDe(){
+  abrir(`<div class="sh"><h2>Acerca de</h2><span class="chip">${APP_VER}</span></div>
+    <div class="panel pad" style="display:flex;flex-direction:column;gap:8px">
+      <b>Sistema de Asistencia y Control Escolar</b>
+      <span class="note">Esc. Sec. Nocturna No. 1 · Salinas Victoria, N.L.</span>
+      <span class="note">Registro de obra: [en trámite ante INDAUTOR]</span>
+    </div>
+    <div class="msg">Uso exclusivo de la Esc. Sec. Nocturna No. 1. Prohibida su copia, distribución o modificación sin autorización.</div>
+    <p class="note">${S.tok ? `Celular activado: <b>${esc(S.devNom||"")}</b>${S.activado ? " · " + new Date(S.activado).toLocaleDateString("es-MX") : ""}` : "Este celular no está activado."}</p>
+    <button class="btn block" id="abX" type="button">Cerrar</button>`);
+  $("#abX").addEventListener("click", () => $("#modal").innerHTML = "");
+}
+$("#crest").addEventListener("click", acercaDe);
+$("#crest").addEventListener("keydown", e => { if (e.key === "Enter") acercaDe(); });
+
+render(); renderSync(); renderAjustes2(); renderAdmin(); renderRol();
+if (!S.tok) pantallaActivacion(S.desactivado ? "La dirección desactivó este celular. Se borraron los datos guardados en él." : "");
+else { sincronizar(); traerLista(); if (S.pin) bloquear(); }
+setInterval(() => { const f = ahora().fecha; if (f !== render.f) { render.f = f; render(); } }, 60000);
+})();
+</script>
+<script>if("serviceWorker" in navigator && location.protocol==="https:"){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body>
+</html>
