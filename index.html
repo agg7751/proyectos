@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Proyectos Educativos</title>
+<meta name="description" content="Programas para escuelas públicas: asistencia, apoyo a maestros, apoyo a padres y cursos.">
+<meta name="theme-color" content="#14213D">
+<link rel="icon" href="icono-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#F4F1EA;--fg:#14213D;--muted:#55607A;--card:#FFFFFF;--line:#DCD6C8;--gold:#C69A4A;--ink:#0B1A2E;--ok:#1E7A4F;
+--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme:dark){:root{--bg:#0B1220;--fg:#ECEFF5;--muted:#A3AEC2;--card:#141F35;--line:#2A3754;--gold:#E2C17F;--ok:#5CCB94}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.5}
+header{background:var(--ink);color:#F4F1EA;padding:44px 16px 36px}
+.wrap{max-width:960px;margin:0 auto;padding:0 16px}
+header .wrap{padding:0}
+h1{font-size:clamp(1.8rem,5vw,2.6rem);margin:0 0 8px;letter-spacing:-.01em}
+header p{margin:0;color:#C9D2E3;max-width:60ch}
+.raya{width:56px;height:4px;background:var(--gold);border-radius:2px;margin-bottom:18px}
+main{padding:28px 0 48px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.card h2{font-size:1.15rem;margin:0}
+.para{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+.card p{margin:0;color:var(--muted)}
+.card .acc{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{display:inline-block;background:var(--ink);color:#F4F1EA;text-decoration:none;font-weight:700;padding:11px 16px;border-radius:10px}
+@media (prefers-color-scheme:dark){.btn{background:var(--gold);color:#0B1220}}
+.chip{font-size:.8rem;font-weight:600;border:1px solid var(--line);border-radius:999px;padding:3px 10px;color:var(--muted)}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 20px;margin-top:20px}
+summary{cursor:pointer;font-weight:700;padding:14px 0}
+details ol{margin:0 0 16px;padding-left:1.2em;color:var(--muted)}
+details li{margin-bottom:6px}
+footer{color:var(--muted);font-size:.85rem;padding:0 0 32px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="raya"></div>
+  <h1>Proyectos Educativos</h1>
+  <p>Programas hechos para la escuela pública: control de asistencia, apoyo a maestros, apoyo a padres y cursos. Se abren desde el celular, sin instalar nada de tiendas.</p>
+</div></header>
+<main class="wrap">
+  <div class="grid">
+    <article class="card">
+      <span class="para">Escuelas · Dirección y docentes</span>
+      <h2>Sistema de Asistencia y Control Escolar</h2>
+      <p>Asistencia con gafete QR, aviso a padres por WhatsApp, faltas, semáforo de riesgo y concentrado en Drive. Funciona sin señal. Requiere clave de acceso.</p>
+      <div class="acc"><a class="btn" href="asistencia/">Abrir</a><span class="chip">iPhone y Android</span></div>
+    </article>
+    <article class="card">
+      <span class="para">Maestros</span>
+      <h2>Aula Inteligente Integral</h2>
+      <p>Planeaciones por PDA, evaluaciones, avisos a padres y ruta de mejora.</p>
+      <div class="acc"><span class="chip">Próximamente</span></div>
+    </article>
+    <article class="card">
+      <span class="para">Padres de familia</span>
+      <h2>Maestro en Casa</h2>
+      <p>Explicaciones por PDA, videos, lectura, escritura y emociones para ayudar con las tareas, de primaria a secundaria.</p>
+      <div class="acc"><span class="chip">Próximamente</span></div>
+    </article>
+    <article class="card">
+      <span class="para">Alumnos</span>
+      <h2>Cursos para tablets</h2>
+      <p>Aprende, Refuerza y Construye (Matemáticas y Español) y manejo de emociones y convivencia.</p>
+      <div class="acc"><span class="chip">Próximamente</span></div>
+    </article>
+  </div>
+
+  <details>
+    <summary>Cómo instalar una app en el celular</summary>
+    <ol>
+      <li><b>iPhone:</b> abre el enlace en <b>Safari</b>, toca <b>Compartir</b> (cuadro con flecha) y elige <b>Agregar a pantalla de inicio</b>.</li>
+      <li><b>Android:</b> abre el enlace en <b>Chrome</b>, toca <b>⋮</b> y elige <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.</li>
+      <li>Ábrela desde el ícono nuevo. La primera vez necesita internet; después funciona sin señal.</li>
+    </ol>
+  </details>
+</main>
+<footer class="wrap">Uso educativo. Los datos de alumnos no se guardan en esta página.</footer>
+</body>
+</html>
